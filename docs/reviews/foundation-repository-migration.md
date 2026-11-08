@@ -1,6 +1,6 @@
 # Foundation Repository Migration Evidence
 
-**Status:** Local bootstrap verified; remote and branch-protection gate pending  
+**Status:** Local bootstrap committed and verified; remote and branch-protection gate pending  
 **Started:** 2026-11-09  
 **Scope:** Foundation Task 1 — fresh root pnpm monorepo
 
@@ -45,6 +45,9 @@ An initial test attempt under Node.js `20.19.4` could not start Vitest workers b
 - Full local gate passed under Node.js `22.23.3`: install, secret scan, lint, typecheck, tests, and builds.
 - Frontend tests: 4 files / 6 tests passed. Shared contracts: 1 file / 1 test passed. Other shared package checks completed with zero failures.
 - Root CI defines stable `quality` and `secret-scan` jobs and contains no deployment credentials or deployment job.
+- Fresh root commit: `e3a1de1 build: establish skinlab pnpm monorepo`.
+- Post-commit Gitleaks scan covered the worktree and the first Git commit; both scans reported no leaks.
+- Pre-existing local-only paths `.agents/`, `.antigravity`, `AGENTS.md`, and `frontend-junior-interview-roadmap-7-days.md` were deliberately not included because they are outside the approved Task 1 add scope.
 
 ## Known tooling warnings
 
@@ -52,7 +55,6 @@ An initial test attempt under Node.js `20.19.4` could not start Vitest workers b
 
 ## Pending remote gate
 
-- Root initial commit and post-commit history scan.
 - New empty monorepo remote URL; the old frontend remote must not be reused.
 - Remote CI evidence for `quality` and `secret-scan`.
 - Protected `main`, `dev`, and `stg` rules and final checkout on `dev`.
