@@ -1,6 +1,6 @@
 # Foundation Repository Migration Evidence
 
-**Status:** Local bootstrap committed and verified; remote and branch-protection gate pending  
+**Status:** Remote branches and CI verified; branch-protection gate blocked by GitHub plan  
 **Started:** 2026-11-09  
 **Scope:** Foundation Task 1 — fresh root pnpm monorepo
 
@@ -56,5 +56,7 @@ An initial test attempt under Node.js `20.19.4` could not start Vitest workers b
 ## Pending remote gate
 
 - Selected remote: `git@github.com:bui-dev/SKINLAB.git`. The active SSH identity authenticates as `manhtruongbui63` and does not have repository access, while the existing HTTPS credential passed read and write dry-run checks. Therefore local `origin` uses `https://github.com/bui-dev/SKINLAB.git` for the same repository. The old frontend remote is not reused.
-- Remote CI evidence for `quality` and `secret-scan`.
-- Protected `main`, `dev`, and `stg` rules and final checkout on `dev`.
+- `main`, `dev`, and `stg` were created from commit `47dd3d70775b7299be269a1337453ebfdc14d75c`; remote ref verification confirmed all three initially pointed to that same baseline. The working checkout was left on `dev`.
+- Main CI run [`42508759431`](https://github.com/bui-dev/SKINLAB/actions/runs/42508759431) completed successfully. Required jobs `quality` and `secret-scan` both concluded `success`.
+- GitHub rejected branch-protection configuration for `main`, `dev`, and `stg` with HTTP 403: `Upgrade to GitHub Pro or make this repository public to enable this feature.` No protection rule was partially applied.
+- Foundation Task 1 remains incomplete until the Product Owner selects one of these policy paths: upgrade the private repository plan, make the repository public, approve a governance exception with compensating controls, or approve migration to a provider that supports protected private branches within budget.
