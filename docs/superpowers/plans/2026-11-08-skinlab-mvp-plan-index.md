@@ -14,15 +14,15 @@
 
 ## Plan set
 
-| Order | Plan                                                                                              | Approved status                                                                               |
-| ----: | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-|    A0 | [Appointment Prototype](./2026-11-08-00-appointment-prototype-a0.md)                              | Execution-detail approved; awaiting Foundation Task 1 gate; disposable code, durable learning |
-|     1 | [Foundation, Security, and Infrastructure](./2026-11-08-01-foundation-security-infrastructure.md) | Execution-detail approved; Task 1 in progress; fake-data scope                                |
-|     2 | [Appointments and Queue](./2026-11-08-02-appointments-queue.md)                                   | Roadmap approved; revalidation required after A0/Foundation                                   |
-|     3 | [Clinical Records and Treatment Courses](./2026-11-08-03-clinical-records-treatment.md)           | Roadmap approved; revalidation required                                                       |
-|     4 | [Packages, Payments, and Receipts](./2026-11-08-04-packages-payments-receipts.md)                 | Roadmap approved; revalidation required                                                       |
-|     5 | [Inventory and Stocktake](./2026-11-08-05-inventory-stocktake.md)                                 | Roadmap approved; revalidation required                                                       |
-|     6 | [Compliance, Migration, and Go-Live](./2026-11-08-06-compliance-migration-go-live.md)             | Roadmap approved; external gates and revalidation required                                    |
+| Order | Plan                                                                                              | Approved status                                                                                   |
+| ----: | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+|    A0 | [Appointment Prototype](./2026-11-08-00-appointment-prototype-a0.md)                              | Execution-detail approved; dependency-eligible but not started; disposable code, durable learning |
+|     1 | [Foundation, Security, and Infrastructure](./2026-11-08-01-foundation-security-infrastructure.md) | Execution-detail approved; Task 1 complete; Tasks 2–9 not started; fake-data scope                |
+|     2 | [Appointments and Queue](./2026-11-08-02-appointments-queue.md)                                   | Roadmap approved; revalidation required after A0/Foundation                                       |
+|     3 | [Clinical Records and Treatment Courses](./2026-11-08-03-clinical-records-treatment.md)           | Roadmap approved; revalidation required                                                           |
+|     4 | [Packages, Payments, and Receipts](./2026-11-08-04-packages-payments-receipts.md)                 | Roadmap approved; revalidation required                                                           |
+|     5 | [Inventory and Stocktake](./2026-11-08-05-inventory-stocktake.md)                                 | Roadmap approved; revalidation required                                                           |
+|     6 | [Compliance, Migration, and Go-Live](./2026-11-08-06-compliance-migration-go-live.md)             | Roadmap approved; external gates and revalidation required                                        |
 
 Supporting review artifacts:
 
@@ -34,7 +34,7 @@ Supporting review artifacts:
 
 ## Execution authorization
 
-Foundation Task 1 was authorized on 2026-11-09. The dependency order below remains controlling: A0 cannot begin until Task 1 satisfies its gate, and later work remains subject to revalidation and external gates.
+Foundation Task 1 was authorized and completed on 2026-11-09. The dependency order below remains controlling: A0 is now dependency-eligible but has not started, and later work remains subject to revalidation and external gates.
 
 ## Dependency order
 

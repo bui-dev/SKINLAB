@@ -1,8 +1,8 @@
 # Phase B Dependency and Gate Matrix
 
-**Status:** Approved; execution order frozen; Foundation Task 1 authorized and in progress
+**Status:** Approved; execution order frozen; Foundation Task 1 complete
 
-**Execution authorization:** The Product Owner lifted the hold on 2026-11-09 and authorized sequence row 1. Later rows remain subject to their listed prerequisites and gates.
+**Execution authorization:** The Product Owner lifted the hold on 2026-11-09 and authorized sequence row 1, which is now complete. Row 2 is dependency-eligible but has not started; later rows remain subject to their listed prerequisites and gates.
 
 ## Executable order
 
