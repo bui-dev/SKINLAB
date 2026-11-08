@@ -1,11 +1,11 @@
 # Phase B Design-to-Plan Traceability Matrix
 
-**Status:** Approved; Phase B complete; Foundation Task 1 in progress  
+**Status:** Approved; Phase B and Foundation Task 1 complete  
 **Source baseline:** Approved System/Architecture Design and Governance
 
 | Approved outcome / invariant                                  | Owning plan and task             | Planned evidence                                      | Approval note                                          |
 | ------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
-| Fresh root monorepo, new remote, protected promotion branches | Plan 1 Task 1                    | workspace gate, remote/rules evidence                 | Authorized 2026-11-09; in progress                     |
+| Fresh root monorepo, new remote, protected promotion branches | Plan 1 Task 1                    | workspace gate, remote/rules evidence                 | Complete 2026-11-09                                    |
 | Individual identity, MFA, clinic/remote context               | Plan 1 Task 4                    | authorization matrix and E2E                          | Provisional for fake data; external ratification later |
 | Immutable audit/idempotent writes                             | Plan 1 Task 5                    | integration tests                                     | Execute                                                |
 | Private objects and short-lived access                        | Plan 1 Task 6                    | media-access integration tests                        | Execute with fake objects                              |

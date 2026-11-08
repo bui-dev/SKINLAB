@@ -1,6 +1,6 @@
 # SkinLab Project Governance
 
-**Status:** Active delivery; Phases A–B complete; Foundation Task 1 in progress  
+**Status:** Active delivery; Phases A–B and Foundation Task 1 complete  
 **Effective date:** 2026-11-08  
 **Owner:** Project Sponsor / Product Owner
 
@@ -39,7 +39,7 @@ When documents conflict, use this order and raise a change request:
 - Phase A – Project Governance: complete.
 - Phase B – Implementation Plan Review and Approval: complete.
 - Delivery execution: authorized by Product Owner on 2026-11-09 for Foundation Task 1.
-- Engineering Foundation: Task 1 in progress; remaining tasks not started.
-- A0 Appointment Prototype: not started.
+- Engineering Foundation: Task 1 complete; Tasks 2–9 not started.
+- A0 Appointment Prototype: dependency gate satisfied; not started and awaiting a separate start instruction.
 - Real patient data: prohibited.
 - Production deployment: blocked by external technical and compliance gates.

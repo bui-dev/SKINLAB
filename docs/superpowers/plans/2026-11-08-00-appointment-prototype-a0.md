@@ -10,7 +10,7 @@
 
 **Specs:** `docs/superpowers/specs/2026-11-08-skinlab-system-architecture-design.md` and `docs/superpowers/specs/2026-11-08-skinlab-phase-b-plan-approval-design.md`
 
-**Phase B approval:** Execution-detail approved on 2026-11-08. The general execution hold was lifted on 2026-11-09, but A0 remains gated by successful completion of Foundation Task 1 and has not started.
+**Phase B approval:** Execution-detail approved on 2026-11-08. Foundation Task 1 completed on 2026-11-09, so A0 is dependency-eligible but has not started and awaits a separate start instruction.
 
 ## Global Constraints
 

@@ -1,6 +1,6 @@
 # Foundation Repository Migration Evidence
 
-**Status:** Remote branches and CI verified; branch-protection gate blocked by GitHub plan  
+**Status:** Complete  
 **Started:** 2026-11-09  
 **Scope:** Foundation Task 1 — fresh root pnpm monorepo
 
@@ -53,10 +53,17 @@ An initial test attempt under Node.js `20.19.4` could not start Vitest workers b
 
 `pnpm peers check` reports existing ecosystem peer-range gaps: ESLint plugins currently declare support through ESLint 9 while the approved frontend pins ESLint 10.14.0, and `tsconfck` declares TypeScript 5 while the compatibility alias is TypeScript 6.0.2. The executable lint, typecheck, test, and build gates pass. These warnings are recorded for later dependency maintenance rather than resolved by changing approved versions during repository migration.
 
-## Pending remote gate
+## Remote and branch-protection evidence
 
 - Selected remote: `git@github.com:bui-dev/SKINLAB.git`. The active SSH identity authenticates as `manhtruongbui63` and does not have repository access, while the existing HTTPS credential passed read and write dry-run checks. Therefore local `origin` uses `https://github.com/bui-dev/SKINLAB.git` for the same repository. The old frontend remote is not reused.
+- The Product Owner changed `bui-dev/SKINLAB` to public on 2026-11-09 so GitHub Free could enforce branch protection without additional subscription cost. Fake-data, secret-scanning, real-data, and production gates remain unchanged.
 - `main`, `dev`, and `stg` were created from commit `47dd3d70775b7299be269a1337453ebfdc14d75c`; remote ref verification confirmed all three initially pointed to that same baseline. The working checkout was left on `dev`.
 - Main CI run [`42508759431`](https://github.com/bui-dev/SKINLAB/actions/runs/42508759431) completed successfully. Required jobs `quality` and `secret-scan` both concluded `success`.
-- GitHub rejected branch-protection configuration for `main`, `dev`, and `stg` with HTTP 403: `Upgrade to GitHub Pro or make this repository public to enable this feature.` No protection rule was partially applied.
-- Foundation Task 1 remains incomplete until the Product Owner selects one of these policy paths: upgrade the private repository plan, make the repository public, approve a governance exception with compensating controls, or approve migration to a provider that supports protected private branches within budget.
+- After the visibility change, GitHub returned HTTP 200 while configuring and reading protection for `main`, `dev`, and `stg`.
+- Each protected branch requires a pull request, strict successful checks named `quality` and `secret-scan`, linear history, conversation resolution, and enforcement for administrators. Force pushes and branch deletion are disabled.
+- Required GitHub approving-review count is `0` because the project currently has one human developer and authors cannot self-approve. The independent AI review required by governance remains documentary evidence in the PR/review record and is not represented as a GitHub approval.
+- The completion-evidence change is delivered through a pull request into protected `dev`, proving the configured PR/check path rather than relying only on the branch-protection API response.
+
+## Completion conclusion
+
+Foundation Task 1 is complete when the completion-evidence pull request passes `quality` and `secret-scan`, merges into protected `dev`, and the local checkout is returned to updated `dev`. This record is updated in that pull request and the final merge/CI evidence is recorded in the task ledger.

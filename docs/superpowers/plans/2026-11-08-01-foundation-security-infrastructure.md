@@ -117,7 +117,7 @@ git add .gitignore .gitleaks.toml package.json pnpm-workspace.yaml pnpm-lock.yam
 git commit -m "build: establish skinlab pnpm monorepo"
 ```
 
-- [ ] **Step 11: Create the new remote and protected promotion branches**
+- [x] **Step 11: Create the new remote and protected promotion branches**
 
 After the owner creates or selects the new empty monorepo remote, add it as `origin`; do not reuse the old frontend remote. Push the root commit and wait for `quality` and `secret-scan` to pass. Create `dev` and `stg` from the same baseline, and configure `dev`, `stg`, and `main` to reject force-push/deletion and require pull requests plus those two named checks. Leave the working checkout on `dev`. Verify the rules through the provider's read-only branch/rules view and record the remote URL and rule evidence in `docs/reviews/foundation-repository-migration.md`.
 
