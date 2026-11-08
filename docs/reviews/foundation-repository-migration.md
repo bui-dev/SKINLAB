@@ -55,6 +55,6 @@ An initial test attempt under Node.js `20.19.4` could not start Vitest workers b
 
 ## Pending remote gate
 
-- New empty monorepo remote URL; the old frontend remote must not be reused.
+- Selected remote: `git@github.com:bui-dev/SKINLAB.git`. The active SSH identity authenticates as `manhtruongbui63` and does not have repository access, while the existing HTTPS credential passed read and write dry-run checks. Therefore local `origin` uses `https://github.com/bui-dev/SKINLAB.git` for the same repository. The old frontend remote is not reused.
 - Remote CI evidence for `quality` and `secret-scan`.
 - Protected `main`, `dev`, and `stg` rules and final checkout on `dev`.
