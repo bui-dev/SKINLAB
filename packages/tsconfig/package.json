@@ -1,0 +1,14 @@
+{
+  "name": "@skinlab/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "base.json"
+  ],
+  "scripts": {
+    "lint": "prettier base.json --check",
+    "typecheck": "node -e \"JSON.parse(require('node:fs').readFileSync('base.json', 'utf8'))\"",
+    "test": "node -e \"JSON.parse(require('node:fs').readFileSync('base.json', 'utf8'))\"",
+    "build": "node -e \"JSON.parse(require('node:fs').readFileSync('base.json', 'utf8'))\""
+  }
+}

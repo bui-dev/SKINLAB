@@ -1,0 +1,20 @@
+packages:
+  - admin-skinlab
+  - api-skinlab
+  - packages/*
+
+minimumReleaseAgeExclude:
+  - "@storybook/builder-vite@10.6.6"
+  - "@storybook/nextjs-vite@10.6.6"
+  - "@storybook/react-dom-shim@10.6.6"
+  - "@storybook/react-vite@10.6.6"
+  - "@storybook/react@10.6.6"
+  - jsdom@31.0.0
+  - lucide-react@1.70.0
+  - storybook@10.6.6
+  - vite-plugin-storybook-nextjs@10.6.6
+
+allowBuilds:
+  "@parcel/watcher": true
+  "@swc/core": true
+  esbuild: true

@@ -1,0 +1,22 @@
+{
+  "name": "@skinlab/test-support",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src --config ../eslint-config/index.mjs --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@skinlab/eslint-config": "workspace:*",
+    "@skinlab/tsconfig": "workspace:*",
+    "@typescript/native": "npm:typescript@7.0.2",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vitest": "5.1.0"
+  }
+}

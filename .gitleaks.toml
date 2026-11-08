@@ -1,0 +1,13 @@
+title = "SkinLab secret scanning"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated and dependency directories"
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)\.next/''',
+  '''(^|/)storybook-static/''',
+  '''(^|/)coverage/'''
+]

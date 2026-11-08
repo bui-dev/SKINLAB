@@ -1,0 +1,25 @@
+# Dependencies and package-manager state
+**/node_modules/
+.pnpm-store/
+.cache/
+
+# Generated application output
+**/.next/
+**/out/
+**/build/
+**/dist/
+**/storybook-static/
+**/coverage/
+*.tsbuildinfo
+
+# Local environment and secrets
+**/.env*
+!**/.env.example
+*.pem
+
+# Tooling and local workspace state
+.superpowers/
+.DS_Store
+.idea/
+.vscode/
+*.log
