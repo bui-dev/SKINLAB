@@ -89,6 +89,8 @@ Canonical terms are maintained in [CONTEXT.md](../../CONTEXT.md). Important dist
 
 Reception manually creates appointments from external conversations or creates a walk-in visit at the front desk. The MVP stores contact preference and contact history but does not read or send messages.
 
+The reception board always exposes its active operating date. Normal appointment creation defaults to that date and rejects a start earlier than current clinic time or outside clinic hours in both UI and backend. Immediate arrivals use the walk-in flow. Historical migration/backfill, if required, is a separate authorized and audited operation rather than a way to bypass appointment validation. Cross-date records display both date and time.
+
 An appointment may produce at most one encounter for the scheduled visit. Cancelled, rescheduled, and no-show appointments produce no encounter. A walk-in may create an encounter without a prior appointment. A treatment session is the treatment-course-specific clinical work performed within an encounter; an initial consultation encounter may exist without a treatment session.
 
 ### 6.2 Doctor capacity
@@ -103,7 +105,7 @@ An appointment may produce at most one encounter for the scheduled visit. Cancel
 
 - Each active treatment course has a primary doctor.
 - Appointment suggestions prefer that doctor.
-- A patient may accept a substitute for one session without transferring primary ownership.
+- A patient may explicitly accept a substitute for one session without transferring primary ownership; the system never substitutes silently.
 - Permanent transfer is a separate, reasoned, audited action.
 
 ### 6.4 Walk-in policy
@@ -117,6 +119,8 @@ The approved hybrid policy protects booked appointments while filling safe gaps:
 5. Ordinary walk-ins are ordered by check-in time.
 6. Clinical urgency may override the queue only after clinician assessment; reception does not diagnose.
 
+Walk-in proposals are decision support, not automatic assignment. They first state whether any doctor can receive the patient now, then present doctor-labelled options with local date/time, estimated service time, safety buffer, blocking work, earliest safe start, and an explicit action in clinic-facing Vietnamese. With no preference, reception compares all doctors; a preferred doctor is highlighted without hiding labelled alternatives.
+
 ### 6.5 Late arrival and no-show
 
 - At T−10 minutes, the system creates a receptionist contact reminder if the patient has not checked in.
@@ -125,6 +129,9 @@ The approved hybrid policy protects booked appointments while filling safe gaps:
 - A later arrival is marked late and joins the appropriate waiting position.
 - At 19:00, an appointment with no check-in becomes **No-show**, not **Cancelled**.
 - The 15-minute grace period is configurable by admin.
+- Before T+15 an unarrived booking has no late warning. From T+15 it is shown as **Not checked in — priority released**; **Late arrival** is reserved for a patient who actually checks in late.
+- Arrival/priority labels apply only while queue-relevant. In-progress, completed, cancelled, no-show, and needs-rescheduling states suppress grace/late labels; the appointment state takes display precedence.
+- The 19:00 no-show sweep is idempotent and separate from final operational day closure. Checked-in, waiting, and in-progress patients may continue and appear in an owned end-of-day exception list. Final closure requires resolution or authorized acknowledgement of each active exception.
 
 ### 6.6 Doctor leave
 
@@ -134,6 +141,8 @@ The approved hybrid policy protects booked appointments while filling safe gaps:
 - Emergency leave is an admin-created exception with a required reason.
 - Conflicting appointments enter **Needs rescheduling**; reception contacts patients and records attempts.
 - The replacement appointment links to the original, whose reason is preserved.
+- Admin sees the affected-appointment count before approval. Approval creates owned manual-contact tasks immediately, including urgency/deadline, attempt history, unresolved age, and escalation to admin.
+- First contact is due within two working hours for an in-hours approval, before 10:00 next working day for an after-hours approval, and immediately when an affected appointment is under 24 hours away.
 
 ## 7. Clinical record design
 
