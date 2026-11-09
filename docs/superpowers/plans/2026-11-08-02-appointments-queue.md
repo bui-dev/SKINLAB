@@ -10,15 +10,28 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-08-skinlab-system-architecture-design.md`
 
-**Phase B approval:** Roadmap approved on 2026-11-08; not authorized for execution because revalidation remains required. Revalidate against accepted A0 findings, actual Foundation interfaces, scheduling-policy ownership, PostgreSQL conflict behavior, and patient merge/reversal rules.
+**Phase B approval:** Roadmap approved on 2026-11-08. A0 business revalidation was completed on 2026-11-09 against prototype commit `24c28dd1f75277003e0bcd4eb95b8d3c16ba1f65`; the accepted findings are incorporated below. This plan remains unauthorized for execution until its Foundation interfaces and remaining dependency gates are verified and the Product Owner gives a separate start instruction.
+
+## A0 Revalidation Baseline
+
+- F-001: expose operating-date context, distinguish absent-after-grace from actual late check-in, and suppress misleading cross-date/time presentation.
+- F-002: normal scheduling rejects past/out-of-hours starts in UI and backend; migration/backfill is a separate authorized/audited path.
+- F-003/F-004: safe-gap options are doctor-labelled, localized decision support with explicit actions, calculation context, and no silent assignment.
+- F-005: leave approval previews conflicts and creates owned contact tasks with the approved two-working-hour/next-day-10:00/under-24-hour SLA and escalation.
+- F-006: appointment status has display precedence; non-queue/terminal states suppress late/grace labels.
+- F-007: the idempotent 19:00 no-show sweep is separate from final day closure and preserves active-patient exceptions.
+- Prototype components/store are reference evidence only and must not be copied into production paths without normal design, tests, security review, and Definition of Done.
 
 ## Global Constraints
 
 - One clinic, two doctors, default working hours 09:00–19:00 in `Asia/Ho_Chi_Minh`.
 - Appointment duration is derived from ordered service stages and doctor segments; unknown service uses a configurable initial-assessment duration.
 - A primary doctor is preferred when one exists, but permanent course ownership is not changed by a substitute appointment.
+- A substitute for the current visit requires explicit customer agreement and is never assigned silently.
 - Walk-ins may fill only safe gaps that preserve the next booked appointment plus safety buffer.
 - T−10 minutes creates a contact task; T+15 minutes releases priority; remaining absent at 19:00 becomes `NO_SHOW`.
+- The active operating date is explicit; normal appointment creation rejects past/out-of-hours starts at both contract and UI boundaries.
+- The 19:00 no-show sweep does not close active checked-in/waiting/in-progress work; final day closure handles owned exceptions separately.
 - External messaging integration is out of scope; reception records contact attempts manually.
 
 ## Review Focus
@@ -28,6 +41,9 @@
 - A patient who checks in at exactly T+15 must follow the documented late-arrival boundary consistently.
 - Approving leave with existing appointments must preserve those appointments and create actionable rescheduling work.
 - Re-running T−10 or 19:00 jobs must not duplicate contact tasks or change already-final appointment outcomes.
+- Terminal/non-queue cards must never render contradictory late/grace labels.
+- Safe-gap explanations must identify the doctor, local time, duration, buffer, blocking work, and explicit action in Vietnamese.
+- Leave conflicts must receive owned contact work within the approved SLA and escalate while unresolved.
 
 ---
 
@@ -158,7 +174,10 @@ git commit -m "feat(catalog): add schedulable service durations"
 - Create: `api-skinlab/src/modules/scheduling/domain/doctor-availability.ts`
 - Create: `api-skinlab/src/modules/scheduling/domain/leave-request.ts`
 - Create: `api-skinlab/src/modules/scheduling/application/request-leave.ts`
+- Create: `api-skinlab/src/modules/scheduling/application/preview-leave-impact.ts`
 - Create: `api-skinlab/src/modules/scheduling/application/decide-leave.ts`
+- Create: `api-skinlab/src/modules/scheduling/domain/rescheduling-contact-task.ts`
+- Create: `api-skinlab/src/modules/scheduling/application/list-rescheduling-contact-tasks.ts`
 - Create: `api-skinlab/src/modules/scheduling/application/get-doctor-availability.ts`
 - Create: `api-skinlab/src/modules/scheduling/infrastructure/prisma-availability-repository.ts`
 - Create: `api-skinlab/src/modules/scheduling/application/leave-request.test.ts`
@@ -167,11 +186,11 @@ git commit -m "feat(catalog): add schedulable service durations"
 **Interfaces:**
 
 - Consumes: Identity roles, audit, clinic timezone, scheduled jobs.
-- Produces: `requestLeave(command): Promise<LeaveRequest>`; `decideLeave(command): Promise<LeaveDecisionResult>` containing `affectedAppointmentIds`; `getDoctorAvailability(query): Promise<AvailabilityWindow[]>`.
+- Produces: `requestLeave(command): Promise<LeaveRequest>`; `previewLeaveImpact(command): Promise<LeaveImpactPreview>`; `decideLeave(command): Promise<LeaveDecisionResult>` containing affected appointments and created rescheduling-contact tasks; `getDoctorAvailability(query): Promise<AvailabilityWindow[]>`.
 
 - [ ] **Step 1: Write failing leave-policy tests**
 
-Cover following-week request submitted Monday–Friday, late request rejection, admin approval/rejection, emergency admin leave with reason, and affected appointment identification.
+Cover following-week request submitted Monday–Friday, late request rejection, admin approval/rejection, emergency admin leave with reason, pre-approval conflict preview, affected appointment preservation, owned contact-task creation, and SLA assignment: two working hours for in-hours approval, before 10:00 next working day for after-hours approval, and immediate urgency under 24 hours.
 
 - [ ] **Step 2: Run scheduling tests**
 
@@ -185,7 +204,7 @@ Base availability is 09:00–19:00; approved leave subtracts unavailable windows
 
 - [ ] **Step 4: Add doctor request and admin decision screens**
 
-Show pending, approved, rejected, and emergency leave with affected-appointment counts.
+Show pending, approved, rejected, and emergency leave with affected-appointment counts before approval. After approval show contact-task owner, deadline, attempt history, unresolved age, urgency, and escalation.
 
 - [ ] **Step 5: Run tests**
 
@@ -221,7 +240,7 @@ git commit -m "feat(scheduling): add doctor availability and leave"
 
 - [ ] **Step 1: Write failing scheduling tests**
 
-Test two concurrent bookings, approved leave conflict, start/end ordering, requested-doctor preference, reschedule history link, and cancellation reason.
+Test two concurrent bookings, approved leave conflict, start/end ordering, requested-doctor preference, reschedule history link, cancellation reason, rejection of past/out-of-hours operational booking at the application boundary, and separation of authorized audited backfill/migration from normal scheduling.
 
 - [ ] **Step 2: Run appointment integration tests**
 
@@ -231,7 +250,7 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement appointment aggregate and database conflict protection**
 
-Use transactional conflict checks plus a PostgreSQL exclusion/locking strategy that prevents overlapping doctor segments under concurrency.
+Use transactional conflict checks plus a PostgreSQL exclusion/locking strategy that prevents overlapping doctor segments under concurrency. Validate clinic-local operating date/time on every command; UI input limits are not trusted as enforcement.
 
 - [ ] **Step 4: Implement rescheduling tasks after leave approval**
 
@@ -239,7 +258,7 @@ Changing to a replacement appointment preserves the original status/reason and c
 
 - [ ] **Step 5: Add reception calendar UI**
 
-Show both doctors, patient time, doctor segments, requested/assigned doctor, conflict explanation, and replacement link.
+Show the active operating date; default creation to it; reject past/out-of-hours values before submission; and display both date and time for cross-date records. Show both doctors, patient time, doctor segments, requested/assigned doctor, conflict explanation, and replacement link.
 
 - [ ] **Step 6: Run tests and typecheck**
 
@@ -264,6 +283,7 @@ git commit -m "feat(scheduling): add conflict-safe appointments"
 - Create: `api-skinlab/src/modules/scheduling/application/record-contact-attempt.ts`
 - Create: `api-skinlab/src/modules/scheduling/jobs/create-contact-reminders.ts`
 - Create: `api-skinlab/src/modules/scheduling/jobs/mark-no-shows.ts`
+- Create: `api-skinlab/src/modules/scheduling/application/get-end-of-day-exceptions.ts`
 - Create: `api-skinlab/src/modules/scheduling/application/check-in-patient.test.ts`
 - Create: `api-skinlab/src/modules/scheduling/jobs/no-show-jobs.integration.test.ts`
 - Create: `admin-skinlab/src/features/check-in/**`
@@ -271,11 +291,11 @@ git commit -m "feat(scheduling): add conflict-safe appointments"
 **Interfaces:**
 
 - Consumes: Appointment, clinic timezone, job runner, audit, and the effective `SchedulingPolicy` from Task 2.
-- Produces: `checkInPatient(command): Promise<CheckInResult>` with `ON_TIME | LATE`; `recordContactAttempt(command): Promise<ContactAttempt>`; idempotent jobs for T−10 and 19:00.
+- Produces: `checkInPatient(command): Promise<CheckInResult>` with `ON_TIME | LATE`; `recordContactAttempt(command): Promise<ContactAttempt>`; `getEndOfDayExceptions(date): Promise<ActiveDayException[]>`; idempotent jobs for T−10 and the 19:00 no-show sweep. Final operational day closure is a separate authorized workflow.
 
 - [ ] **Step 1: Write failing boundary tests**
 
-Cover before appointment, exactly at appointment, T+14:59, T+15:00, a changed grace-policy value, patient-reported delay, duplicate contact job, checked-in reminder suppression, cancelled/rescheduled/final-state reminder suppression, and no-show rerun.
+Cover before appointment, exactly at appointment, T+14:59, T+15:00, a changed grace-policy value, patient-reported delay, duplicate contact job, checked-in reminder suppression, cancelled/rescheduled/final-state reminder suppression, no-show rerun, and preservation/listing of checked-in, waiting, and in-progress end-of-day exceptions.
 
 - [ ] **Step 2: Run tests**
 
@@ -285,15 +305,15 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement check-in and contact records**
 
-Late arrival releases priority but does not cancel the appointment. Contact outcomes are `NOT_CONTACTED`, `AWAITING_RESPONSE`, `CONFIRMED`, or `RESCHEDULE_REQUESTED`.
+Late arrival releases priority but does not cancel the appointment. Contact outcomes are `NOT_CONTACTED`, `AWAITING_RESPONSE`, `CONFIRMED`, or `RESCHEDULE_REQUESTED`. The 19:00 sweep changes only eligible unarrived `BOOKED` appointments and never represents final day closure.
 
 - [ ] **Step 4: Implement scheduled reminders and no-show closure**
 
-Jobs query by clinic-local time and remain safe on retry. T−10 creates a contact task only for an active booked appointment that has not checked in; cancelled, rescheduled, no-show, completed, and already checked-in records are excluded.
+Jobs query by clinic-local time and remain safe on retry. T−10 creates a contact task only for an active booked appointment that has not checked in; cancelled, rescheduled, no-show, completed, and already checked-in records are excluded. The 19:00 sweep preserves active patient work and feeds a separate owned exception list for final closure.
 
 - [ ] **Step 5: Add reception check-in/contact UI**
 
-Show due reminders, last contact attempt, grace-period countdown, and explicit late/no-show status.
+Show due reminders, last contact attempt, grace-period countdown, and explicit late/no-show status. Before T+15 an absent booking has no warning; from T+15 use `Chưa check-in — mất ưu tiên`, reserving `Đến muộn — mất ưu tiên` for actual late check-in. Suppress grace/late labels for in-progress, completed, cancelled, no-show, and needs-rescheduling states. Show owned end-of-day active exceptions separately.
 
 - [ ] **Step 6: Run tests**
 
@@ -323,11 +343,11 @@ git commit -m "feat(scheduling): add check-in late and no-show handling"
 **Interfaces:**
 
 - Consumes: Doctor availability, appointment estimates, next protected appointment, and `getEffectiveSchedulingPolicy(at)` from Task 2; safe-gap decisions use the returned `safeGapBufferMinutes` value.
-- Produces: `proposeWalkInOptions(command): Promise<WalkInOption[]>`; `enqueueWalkIn(command): Promise<QueueEntry>`; option reasons `SAFE_GAP`, `ALTERNATE_DOCTOR`, `WAIT_NEXT_GAP`, `BOOK_LATER`, `CLINICAL_REVIEW_REQUIRED`.
+- Produces: `proposeWalkInOptions(command): Promise<WalkInOption[]>`; `enqueueWalkIn(command): Promise<QueueEntry>`; explicit `acceptSubstitute(commandWithCustomerAgreement): Promise<QueueEntry>`; option reasons `SAFE_GAP`, `ALTERNATE_DOCTOR`, `WAIT_NEXT_GAP`, `BOOK_LATER`, `CLINICAL_REVIEW_REQUIRED`. Each option carries doctor identity, availability, local earliest-safe-start, service minutes, buffer minutes, blocking-work summary, and an explicit permitted action.
 
 - [ ] **Step 1: Write failing hybrid-policy tests**
 
-Cover a walk-in fitting with buffer, crossing buffer by one minute, both doctors busy, primary-doctor preference, patient accepting substitute, clinician-marked priority, and an effective policy version with a changed `safeGapBufferMinutes` value altering the proposed option.
+Cover a walk-in fitting with buffer, crossing buffer by one minute, both doctors busy, primary-doctor preference, no-preference comparison, patient accepting substitute for the current visit without changing course ownership, refusal to substitute, clinician-marked priority, doctor-labelled explanation fields, and an effective policy version with a changed `safeGapBufferMinutes` value altering the proposed option.
 
 - [ ] **Step 2: Run queue tests**
 
@@ -337,11 +357,11 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement safe-gap calculation**
 
-Reception cannot independently mark clinical urgency; only an authorized doctor decision creates `CLINICAL_REVIEW_REQUIRED` priority.
+Reception cannot independently mark clinical urgency; only an authorized doctor decision creates `CLINICAL_REVIEW_REQUIRED` priority. A preferred doctor is highlighted without hiding labelled alternatives; no option starts or substitutes silently, and substitute acceptance records customer agreement for this visit only.
 
 - [ ] **Step 4: Add queue UI**
 
-Display checked-in booked patients, late arrivals, walk-ins, in-progress work, estimated doctor release, and why each proposed option is safe or blocked.
+Display checked-in booked patients, late arrivals, walk-ins, in-progress work, and estimated doctor release. Start with a Vietnamese clinic-level conclusion, then compare doctor-labelled options using local date/time, service-duration plus safety-buffer calculation, blocking work, earliest safe start, and explicit start/wait/book-later actions; never expose raw ISO timestamps or implementation reason strings.
 
 - [ ] **Step 5: Run tests**
 
@@ -369,11 +389,11 @@ git commit -m "feat(scheduling): add protected hybrid walk-in queue"
 **Interfaces:**
 
 - Consumes: Patient registry, appointments, check-ins, queue, leave, contact tasks.
-- Produces: `getDayBoard(date: LocalDate): Promise<DayBoard>` and production-like E2E workflow.
+- Produces: `getDayBoard(date: LocalDate): Promise<DayBoard>` with explicit operating date, doctor-labelled scheduling/queue decisions, rescheduling-task SLA state, and active end-of-day exceptions; plus a production-like E2E workflow.
 
 - [ ] **Step 1: Write the failing E2E journey**
 
-Register patient, book requested doctor, create conflicting attempt, check in late, insert safe walk-in, approve doctor leave, reschedule affected appointment, run no-show closure.
+Register patient; reject a past booking; book a requested doctor with visible operating-date context; create a conflicting attempt; demonstrate T+14:59/T+15:00 wording; compare localized safe-gap options; record customer agreement for a one-visit substitute; approve leave and verify contact-task SLA/escalation; reschedule the affected appointment; run the 19:00 no-show sweep while preserving active end-of-day exceptions; verify terminal cards suppress late/grace labels.
 
 - [ ] **Step 2: Run E2E**
 
@@ -383,7 +403,7 @@ Expected: FAIL until day-board integration exists.
 
 - [ ] **Step 3: Implement the day-board query and screen**
 
-Keep the read model optimized for the day's workflow without allowing it to bypass module command interfaces.
+Keep the read model optimized for the day's workflow without allowing it to bypass module command interfaces. Present terminal-state precedence, operating-date context, local date/time, manual-contact urgency/aging, and the separation between the 19:00 no-show sweep and authorized final day closure.
 
 - [ ] **Step 4: Run the phase quality gate**
 
