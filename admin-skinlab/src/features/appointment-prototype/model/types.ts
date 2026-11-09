@@ -32,6 +32,9 @@ export interface PrototypeAppointment {
   estimatedDurationMinutes: number;
   scheduledStart?: string;
   checkedInAt?: string;
+  startedAt?: string;
+  completedAt?: string;
+  cancellationReason?: string;
   requestedDoctorId?: DoctorId;
   primaryDoctorId?: DoctorId;
   assignedDoctorId?: DoctorId;
