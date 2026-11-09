@@ -10,7 +10,7 @@
 
 **Specs:** `docs/superpowers/specs/2026-11-08-skinlab-system-architecture-design.md` and `docs/superpowers/specs/2026-11-08-skinlab-project-governance-design.md`
 
-**Phase B approval:** Execution-detail approved on 2026-11-08. The Product Owner lifted the execution hold and authorized Task 1 on 2026-11-09. Identity/access and staging/deployment ADRs remain provisional for fake-data environments and do not authorize real data or production.
+**Execution status:** Execution-detail approved. Task 1 completed; the Product Owner authorized Task 2 on 2026-11-09 for fake-data local/staging only. Tasks 3–9 remain unauthorized until their dependency/authorization checks. Identity/access and staging/deployment ADRs remain provisional and do not authorize real data or production.
 
 ## Global Constraints
 
