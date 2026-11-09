@@ -10,6 +10,8 @@ import type {
   PrototypeAppointment,
   PrototypeLeave,
 } from "../model/types";
+import { applyApprovedLeave } from "../rules/apply-doctor-leave";
+import { markEndOfDayNoShows } from "../rules/mark-end-of-day-no-shows";
 
 export interface CreateBookedAppointmentInput {
   patientLabel: string;
@@ -37,6 +39,8 @@ export interface A0AppointmentStore {
   startService(input: { appointmentId: string; doctorId: DoctorId }): void;
   completeService(input: { appointmentId: string; completedAt: string }): void;
   cancelAppointment(input: { appointmentId: string; reason: string }): void;
+  approveLeave(input: { leave: PrototypeLeave }): void;
+  closeBusinessDay(input: { now: string }): void;
   advanceClock(now: string): void;
   resetFixtures(): void;
 }
@@ -202,6 +206,28 @@ function createState(
             cancellationReason: reason,
           }),
         ),
+      }));
+    },
+    approveLeave: ({ leave }) => {
+      set((state) => {
+        const result = applyApprovedLeave({
+          leave,
+          appointments: state.appointments,
+        });
+
+        return {
+          leaves: [...state.leaves, leave],
+          appointments: result.appointments,
+        };
+      });
+    },
+    closeBusinessDay: ({ now }) => {
+      set((state) => ({
+        now,
+        appointments: markEndOfDayNoShows({
+          now,
+          appointments: state.appointments,
+        }),
       }));
     },
     advanceClock: (now) => set({ now }),
