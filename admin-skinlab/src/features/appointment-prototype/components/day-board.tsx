@@ -19,7 +19,11 @@ import { WalkInDialog } from "./walk-in-dialog";
 const doctors = createA0Fixtures().doctors;
 
 function toLocalDateTime(timestamp: string) {
-  return timestamp.slice(0, 16);
+  return timestamp.slice(0, 19);
+}
+
+function toClinicTimestamp(localDateTime: string) {
+  return `${localDateTime.length === 16 ? `${localDateTime}:00` : localDateTime}+07:00`;
 }
 
 export function DayBoard() {
@@ -63,13 +67,14 @@ export function DayBoard() {
           <Input
             id="prototype-clock"
             type="datetime-local"
+            step={1}
             value={clockInput}
             onChange={(event) => setClockInput(event.target.value)}
           />
         </label>
         <Button
           variant="outline"
-          onClick={() => advanceClock(`${clockInput}:00+07:00`)}
+          onClick={() => advanceClock(toClinicTimestamp(clockInput))}
         >
           Cập nhật giờ mô phỏng
         </Button>

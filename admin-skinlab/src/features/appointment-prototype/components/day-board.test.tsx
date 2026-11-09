@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { useA0AppointmentStore } from "../store/use-a0-appointment-store";
@@ -63,6 +63,43 @@ describe("DayBoard", () => {
     render(<DayBoard />);
 
     expect(screen.getByText("Đến muộn — mất ưu tiên")).toBeInTheDocument();
+  });
+
+  it("demonstrates_the_second_before_and_the_exact_grace_boundary", async () => {
+    const user = userEvent.setup();
+    render(<DayBoard />);
+    const clock = screen.getByLabelText("Giờ mô phỏng");
+
+    fireEvent.change(clock, { target: { value: "2026-11-10T09:44:59" } });
+    await user.click(
+      screen.getByRole("button", { name: "Cập nhật giờ mô phỏng" }),
+    );
+    expect(
+      screen.getByText("Trong thời gian ưu tiên 15 phút"),
+    ).toBeInTheDocument();
+
+    fireEvent.change(clock, { target: { value: "2026-11-10T09:45:00" } });
+    await user.click(
+      screen.getByRole("button", { name: "Cập nhật giờ mô phỏng" }),
+    );
+    expect(screen.getByText("Đến muộn — mất ưu tiên")).toBeInTheDocument();
+  });
+
+  it("cancels_a_booking_without_turning_it_into_a_no_show", async () => {
+    const user = userEvent.setup();
+    render(<DayBoard />);
+
+    await user.click(screen.getByRole("button", { name: "Hủy BN-003" }));
+    await user.click(
+      screen.getByRole("button", { name: "Đóng ngày lúc 19:00" }),
+    );
+
+    expect(
+      useA0AppointmentStore
+        .getState()
+        .appointments.find(({ id }) => id === "appointment-003")?.status,
+    ).toBe("cancelled");
+    expect(screen.getByText("Đã hủy")).toBeInTheDocument();
   });
 
   it("requires_an_explicit_substitute_choice", async () => {

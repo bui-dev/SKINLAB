@@ -37,6 +37,9 @@ export function AppointmentCard({
   const completeService = useA0AppointmentStore(
     (state) => state.completeService,
   );
+  const cancelAppointment = useA0AppointmentStore(
+    (state) => state.cancelAppointment,
+  );
   const preferredDoctorId =
     appointment.requestedDoctorId ?? appointment.primaryDoctorId;
   const doctorProposals =
@@ -97,6 +100,21 @@ export function AppointmentCard({
           }
         >
           Check-in {appointment.patientLabel}
+        </Button>
+      ) : null}
+
+      {["booked", "checked_in", "waiting"].includes(appointment.status) ? (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() =>
+            cancelAppointment({
+              appointmentId: appointment.id,
+              reason: "Hủy trong phiên review A0",
+            })
+          }
+        >
+          Hủy {appointment.patientLabel}
         </Button>
       ) : null}
 
