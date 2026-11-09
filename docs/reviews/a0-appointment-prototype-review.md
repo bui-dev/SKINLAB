@@ -1,6 +1,6 @@
 # A0 Appointment Prototype Review Record
 
-**Status:** Accepted by Product Owner — Task 6 complete  
+**Status:** Accepted by Product Owner — A0 Tasks 1–7 complete  
 **Prototype branch:** `prototype/a0-appointment`  
 **Prototype commit:** `24c28dd1f75277003e0bcd4eb95b8d3c16ba1f65`  
 **Route:** `/prototype/appointments`  
@@ -126,12 +126,13 @@ Allowed dispositions are `accepted`, `rejected`, or `needs decision`. A0 cannot 
 
 ## Closure statement
 
-Task 6 is closed with all findings resolved and durable documents/Plan 2 revalidated. A0 proceeds to Task 7 for evidence tagging and archive; prototype application code remains excluded from production merge paths.
+Task 6 is closed with all findings resolved and durable documents/Plan 2 revalidated. Task 7 is closed with the evidence tag and prototype branch preserved remotely, the docs-only PR merged into `dev`, and prototype application code excluded from production merge paths. The A0 Appointment Prototype is complete; Plan 2 remains separately gated and unauthorized for execution.
 
 ## Task 7 archive and code disposition
 
 - Accepted prototype artifacts commit: `00d8c0f53b08bf9d51a022218c2e64a427aa9502`.
 - Immutable evidence tag: `prototype-a0-accepted`.
 - Archived remote branch: `prototype/a0-appointment`.
+- Docs-only merge: PR [#2](https://github.com/bui-dev/SKINLAB/pull/2), commit `cfef7009ca01ce46f975a76ca23b2134b7379d37` on `dev`.
 - Prototype code disposition: **reference only — reimplement**.
 - No prototype component, store, rule implementation, or route is approved for direct production reuse. Any future reuse proposal requires a new production issue, fresh tests, security review, and the normal Definition of Done.
