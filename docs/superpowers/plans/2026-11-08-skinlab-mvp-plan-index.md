@@ -10,19 +10,19 @@
 
 **Phase B design:** `docs/superpowers/specs/2026-11-08-skinlab-phase-b-plan-approval-design.md`
 
-**Phase B status:** Complete and approved on 2026-11-08. The Product Owner lifted the execution hold and authorized Foundation Task 1 on 2026-11-09.
+**Phase B status:** Complete and approved on 2026-11-08. Foundation Task 1 and A0 are complete; the Product Owner authorized Foundation Task 2 on 2026-11-09 for fake-data local/staging only.
 
 ## Plan set
 
-| Order | Plan                                                                                              | Approved status                                                                                   |
-| ----: | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-|    A0 | [Appointment Prototype](./2026-11-08-00-appointment-prototype-a0.md)                              | Execution-detail approved; dependency-eligible but not started; disposable code, durable learning |
-|     1 | [Foundation, Security, and Infrastructure](./2026-11-08-01-foundation-security-infrastructure.md) | Execution-detail approved; Task 1 complete; Tasks 2–9 not started; fake-data scope                |
-|     2 | [Appointments and Queue](./2026-11-08-02-appointments-queue.md)                                   | Roadmap approved; revalidation required after A0/Foundation                                       |
-|     3 | [Clinical Records and Treatment Courses](./2026-11-08-03-clinical-records-treatment.md)           | Roadmap approved; revalidation required                                                           |
-|     4 | [Packages, Payments, and Receipts](./2026-11-08-04-packages-payments-receipts.md)                 | Roadmap approved; revalidation required                                                           |
-|     5 | [Inventory and Stocktake](./2026-11-08-05-inventory-stocktake.md)                                 | Roadmap approved; revalidation required                                                           |
-|     6 | [Compliance, Migration, and Go-Live](./2026-11-08-06-compliance-migration-go-live.md)             | Roadmap approved; external gates and revalidation required                                        |
+| Order | Plan                                                                                              | Approved status                                                                                |
+| ----: | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+|    A0 | [Appointment Prototype](./2026-11-08-00-appointment-prototype-a0.md)                              | Complete; accepted durable learning merged to `dev`; prototype code archived                   |
+|     1 | [Foundation, Security, and Infrastructure](./2026-11-08-01-foundation-security-infrastructure.md) | Execution-detail approved; Task 1 complete; Task 2 authorized; Tasks 3–9 not started           |
+|     2 | [Appointments and Queue](./2026-11-08-02-appointments-queue.md)                                   | Revalidated from A0; execution still requires Foundation interfaces and separate authorization |
+|     3 | [Clinical Records and Treatment Courses](./2026-11-08-03-clinical-records-treatment.md)           | Roadmap approved; revalidation required                                                        |
+|     4 | [Packages, Payments, and Receipts](./2026-11-08-04-packages-payments-receipts.md)                 | Roadmap approved; revalidation required                                                        |
+|     5 | [Inventory and Stocktake](./2026-11-08-05-inventory-stocktake.md)                                 | Roadmap approved; revalidation required                                                        |
+|     6 | [Compliance, Migration, and Go-Live](./2026-11-08-06-compliance-migration-go-live.md)             | Roadmap approved; external gates and revalidation required                                     |
 
 Supporting review artifacts:
 
@@ -34,7 +34,7 @@ Supporting review artifacts:
 
 ## Execution authorization
 
-Foundation Task 1 was authorized and completed on 2026-11-09. The dependency order below remains controlling: A0 is now dependency-eligible but has not started, and later work remains subject to revalidation and external gates.
+Foundation Task 1, A0, and A0-driven Plan 2 revalidation completed on 2026-11-09. Foundation Task 2 is now authorized; later work remains subject to the dependency matrix, revalidation, and external gates.
 
 ## Dependency order
 
