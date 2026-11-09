@@ -1,5 +1,12 @@
 {
   "Home": {
     "title": "Quản trị SkinLab"
+  },
+  "AppointmentPrototype": {
+    "warning": "A0 PROTOTYPE — FAKE DATA — NOT FOR PRODUCTION",
+    "title": "Prototype quy trình đặt lịch",
+    "description": "Hiện chỉ hiển thị số lượng dữ liệu giả. Các tương tác sẽ được bổ sung trong những task A0 tiếp theo.",
+    "doctors": "Bác sĩ",
+    "appointments": "Cuộc hẹn"
   }
 }

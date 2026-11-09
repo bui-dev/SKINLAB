@@ -1,5 +1,12 @@
 {
   "Home": {
     "title": "SkinLab Admin"
+  },
+  "AppointmentPrototype": {
+    "warning": "A0 PROTOTYPE — FAKE DATA — NOT FOR PRODUCTION",
+    "title": "Appointment workflow prototype",
+    "description": "Fixture counts only. Interactive workflow behavior is added in later A0 tasks.",
+    "doctors": "Doctors",
+    "appointments": "Appointments"
   }
 }
