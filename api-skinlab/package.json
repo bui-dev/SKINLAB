@@ -11,6 +11,7 @@
     "dev": "tsx watch src/main.ts",
     "start": "node dist/main.js",
     "lint": "eslint src --config ../packages/eslint-config/index.mjs --max-warnings=0",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate:test": "prisma migrate deploy",
     "test": "vitest run --exclude '**/*.integration.test.ts'",
