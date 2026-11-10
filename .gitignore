@@ -20,6 +20,9 @@ api-skinlab/src/generated/
 
 # Tooling and local workspace state
 .superpowers/
+.agents/
+.antigravity
+AGENTS.md
 .DS_Store
 .idea/
 .vscode/
