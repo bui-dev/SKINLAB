@@ -15,6 +15,11 @@ minimumReleaseAgeExclude:
   - vite-plugin-storybook-nextjs@10.6.6
 
 allowBuilds:
+  "@prisma/engines": true
   "@parcel/watcher": true
   "@swc/core": true
+  cpu-features: true
   esbuild: true
+  protobufjs: true
+  prisma: true
+  ssh2: true
