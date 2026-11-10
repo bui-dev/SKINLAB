@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import type { Session } from "@/features/auth/types/session";
 
 export type SessionState = {
@@ -5,7 +7,32 @@ export type SessionState = {
   status: "authenticated" | "unauthenticated" | "loading";
 };
 
-/** Client-consumable stub. Replace it when a real session source exists. */
 export function useSession(): SessionState {
-  return { session: null, status: "unauthenticated" };
+  const [state, setState] = useState<SessionState>({
+    session: null,
+    status: "loading",
+  });
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/auth/session", { credentials: "same-origin" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Session lookup failed.");
+        return (await response.json()) as { session: Session | null };
+      })
+      .then(({ session }) => {
+        if (!cancelled) {
+          setState({
+            session,
+            status: session ? "authenticated" : "unauthenticated",
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setState({ session: null, status: "unauthenticated" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return state;
 }

@@ -101,6 +101,10 @@ SNAPSHOT_DIR="$(mktemp -d /tmp/skinlab-gitleaks-worktree.XXXXXX)"
 trap 'rm -rf "$SNAPSHOT_DIR"' EXIT
 
 while IFS= read -r -d '' repository_file; do
+  # A working tree may intentionally delete a tracked file. `git ls-files`
+  # still returns that path until the deletion is staged, so only copy files
+  # that exist in the worktree into the scan snapshot.
+  [[ -e "$ROOT_DIR/$repository_file" ]] || continue
   mkdir -p "$SNAPSHOT_DIR/$(dirname "$repository_file")"
   cp -pP "$ROOT_DIR/$repository_file" "$SNAPSHOT_DIR/$repository_file"
 done < <(git -C "$ROOT_DIR" ls-files --cached --others --exclude-standard -z)

@@ -19,6 +19,7 @@
     "typecheck": "tsc6 --noEmit"
   },
   "dependencies": {
+    "@skinlab/contracts": "workspace:*",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "@nestjs/common": "12.4.0",
