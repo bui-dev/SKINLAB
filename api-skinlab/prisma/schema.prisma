@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String?
+  payload    Json
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_events")
+}
+
+model IdempotencyKey {
+  id             String   @id @default(cuid())
+  scope          String
+  key            String
+  requestHash    String
+  responseStatus Int?
+  responseBody   Json?
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
+
+  @@unique([scope, key])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}
+
+model RegisteredDevice {
+  id                     String   @id @default(cuid())
+  certificateFingerprint String   @unique
+  label                  String
+  isActive               Boolean  @default(true)
+  registeredAt           DateTime @default(now())
+
+  @@map("registered_devices")
+}

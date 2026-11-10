@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: skinlab
+      POSTGRES_USER: skinlab
+      POSTGRES_PASSWORD: skinlab
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skinlab -d skinlab"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - skinlab-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  skinlab-postgres-data:

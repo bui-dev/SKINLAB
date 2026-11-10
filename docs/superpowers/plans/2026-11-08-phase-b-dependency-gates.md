@@ -1,8 +1,8 @@
 # Phase B Dependency and Gate Matrix
 
-**Status:** Approved; execution order frozen; sequences 1–3 and Foundation Task 2 within sequence 4 complete
+**Status:** Approved; execution order frozen; sequences 1–3 and Foundation Tasks 2–3 within sequence 4 complete
 
-**Execution authorization:** Sequences 1–3 completed on 2026-11-09. Foundation Task 2, the first task within sequence row 4, completed on 2026-11-10 using fake-data local/staging only. Foundation Tasks 3–9 and later rows still require their prerequisites and explicit execution decisions.
+**Execution authorization:** Sequences 1–3 completed on 2026-11-09. Foundation Tasks 2–3 within sequence row 4 completed on 2026-11-10 using fake-data local/staging only. Foundation Tasks 4–9 and later rows still require their prerequisites and explicit execution decisions.
 
 ## Executable order
 

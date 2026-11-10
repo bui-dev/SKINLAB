@@ -5,6 +5,7 @@
 
 # Generated application output
 **/.next/
+api-skinlab/src/generated/
 **/out/
 **/build/
 **/dist/

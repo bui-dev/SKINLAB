@@ -10,7 +10,7 @@
 
 **Specs:** `docs/superpowers/specs/2026-11-08-skinlab-system-architecture-design.md` and `docs/superpowers/specs/2026-11-08-skinlab-project-governance-design.md`
 
-**Execution status:** Execution-detail approved. Task 1 completed; the Product Owner authorized Task 2 on 2026-11-09 for fake-data local/staging only. Tasks 3–9 remain unauthorized until their dependency/authorization checks. Identity/access and staging/deployment ADRs remain provisional and do not authorize real data or production.
+**Execution status:** Execution-detail approved. Tasks 1–3 completed using fake-data local/staging only; the Product Owner authorized Task 2 on 2026-11-09 and Task 3 on 2026-11-10. Tasks 4–9 remain unauthorized until their dependency/authorization checks. Identity/access and staging/deployment ADRs remain provisional and do not authorize real data or production.
 
 ## Global Constraints
 
@@ -188,27 +188,27 @@ git commit -m "feat(api): add health and validated configuration"
 - Consumes: `ApiEnv.DATABASE_URL` from Task 2.
 - Produces: `TransactionManager.run<T>(work: (tx: TransactionContext) => Promise<T>): Promise<T>` and injectable `PrismaService` limited to infrastructure adapters.
 
-- [ ] **Step 1: Write a failing rollback integration test**
+- [x] **Step 1: Write a failing rollback integration test**
 
 Create `transaction-manager.integration.test.ts` that inserts a fixture audit row inside `TransactionManager.run`, throws, and asserts no row remains.
 
-- [ ] **Step 2: Run the integration test with PostgreSQL Testcontainer**
+- [x] **Step 2: Run the integration test with PostgreSQL Testcontainer**
 
 Run: `pnpm --filter @skinlab/api test:integration -- transaction-manager.integration.test.ts`
 
 Expected: FAIL because schema and transaction manager do not exist.
 
-- [ ] **Step 3: Implement Prisma configuration and transaction adapter**
+- [x] **Step 3: Implement Prisma configuration and transaction adapter**
 
 Start with platform tables for `AuditEvent`, `IdempotencyKey`, and `RegisteredDevice`; application modules add their own models in later plans.
 
-- [ ] **Step 4: Generate, migrate, and rerun the integration test**
+- [x] **Step 4: Generate, migrate, and rerun the integration test**
 
 Run: `pnpm --filter @skinlab/api prisma:generate && pnpm --filter @skinlab/api prisma:migrate:test && pnpm --filter @skinlab/api test:integration`
 
 Expected: PASS and rollback leaves zero rows.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add api-skinlab/prisma api-skinlab/src/platform/database docker/local
