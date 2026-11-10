@@ -37,6 +37,10 @@ jobs:
         run: pnpm typecheck
       - name: Test
         run: pnpm test
+      - name: API integration tests
+        run: pnpm --filter @skinlab/api test:integration
+      - name: Gateway mTLS end-to-end test
+        run: pnpm test:gateway-e2e
       - name: Build
         run: pnpm build
 

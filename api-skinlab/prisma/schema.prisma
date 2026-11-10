@@ -44,3 +44,70 @@ model RegisteredDevice {
 
   @@map("registered_devices")
 }
+
+model OidcLoginAttempt {
+  id                    String   @id @default(cuid())
+  stateHash             String   @unique
+  nonceHash             String
+  codeVerifierCiphertext String
+  expiresAt             DateTime
+  consumedAt            DateTime?
+  createdAt             DateTime @default(now())
+
+  @@index([expiresAt])
+  @@map("oidc_login_attempts")
+}
+
+model UserSession {
+  id                     String   @id @default(cuid())
+  sessionIdHash          String   @unique
+  subject                String
+  role                   String
+  acr                    String
+  deviceFingerprint      String
+  accessContext          String
+  refreshTokenHash       String
+  refreshTokenCiphertext String
+  expiresAt              DateTime
+  absoluteExpiresAt      DateTime
+  lastActivityAt         DateTime
+  refreshStartedAt       DateTime?
+  revokedAt              DateTime?
+  revocationReason       String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([subject])
+  @@index([expiresAt])
+  @@map("user_sessions")
+}
+
+model IdentityAccount {
+  subject   String   @id
+  role      String
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("identity_accounts")
+}
+
+model BffExchangeNonce {
+  id        String   @id @default(cuid())
+  nonceHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+  @@map("bff_exchange_nonces")
+}
+
+model GatewayAssertionNonce {
+  id        String   @id @default(cuid())
+  nonceHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+  @@map("gateway_assertion_nonces")
+}

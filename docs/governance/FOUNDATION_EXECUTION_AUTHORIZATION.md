@@ -6,13 +6,14 @@
 
 ## Decision
 
-The Product Owner explicitly lifted the Phase B execution hold and authorized work to begin with `Foundation Task 1 — Initialize the fresh root pnpm monorepo`. After Task 1 and A0 completed, the Product Owner separately authorized `Foundation Task 2 — Add the NestJS API composition root and validated configuration` on 2026-11-09, then `Foundation Task 3 — Add PostgreSQL, Prisma, and module-owned transaction support` on 2026-11-10.
+The Product Owner explicitly lifted the Phase B execution hold and authorized work to begin with `Foundation Task 1 — Initialize the fresh root pnpm monorepo`. After Task 1 and A0 completed, the Product Owner separately authorized `Foundation Task 2 — Add the NestJS API composition root and validated configuration` on 2026-11-09, then `Foundation Task 3 — Add PostgreSQL, Prisma, and module-owned transaction support` on 2026-11-10. On 2026-11-10, the Product Owner authorized the remaining Foundation Tasks 4–9 solely to satisfy the delivery-team handover baseline.
 
 ## Authorized scope
 
 - Execute Foundation Task 1 using the approved implementation plan.
 - Execute Foundation Task 2 using the approved implementation plan and TDD.
 - Execute Foundation Task 3 using the approved implementation plan, TDD, PostgreSQL Docker local, and Testcontainers only.
+- Execute Foundation Tasks 4–9 in their approved dependency order using synthetic identities and data only. Do not push, merge, deploy to the Ubuntu VM, or use real credentials/data without the separately applicable approval.
 - Remove nested frontend Git metadata only after verifying its clean state and recording its remote and commit.
 - Initialize fresh Git history at `SKINLAB/` and establish the local pnpm workspace.
 - Use fake data only.

@@ -10,7 +10,7 @@
 
 **Specs:** `docs/superpowers/specs/2026-11-08-skinlab-system-architecture-design.md` and `docs/superpowers/specs/2026-11-08-skinlab-project-governance-design.md`
 
-**Execution status:** Execution-detail approved. Tasks 1–3 completed using fake-data local/staging only; the Product Owner authorized Task 2 on 2026-11-09 and Task 3 on 2026-11-10. Tasks 4–9 remain unauthorized until their dependency/authorization checks. Identity/access and staging/deployment ADRs remain provisional and do not authorize real data or production.
+**Execution status:** Execution-detail approved. Tasks 1–3 completed using fake-data local/staging only; the Product Owner authorized Task 2 on 2026-11-09 and Task 3 on 2026-11-10. The Product Owner authorized Tasks 4–9 on 2026-11-10 solely for delivery-team handover work with synthetic data. Identity/access and staging/deployment ADRs remain provisional and do not authorize real data or production.
 
 ## Global Constraints
 

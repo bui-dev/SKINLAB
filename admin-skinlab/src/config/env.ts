@@ -1,4 +1,10 @@
+import { isAbsolute } from "node:path";
+
 import { z } from "zod";
+
+const absolutePath = z.string().min(1).refine(isAbsolute, {
+  message: "Secret file paths must be absolute.",
+});
 
 const keyWith32DecodedBytes = z
   .string()
@@ -19,6 +25,9 @@ export const webServerEnvSchema = z
     OIDC_REQUIRED_ACR: z.coerce.number().int().min(2).max(2),
     API_INTERNAL_BASE_URL: z.string().url(),
     BFF_EXCHANGE_HMAC_KEY: keyWith32DecodedBytes,
+    INTERNAL_TLS_CLIENT_CERT_PATH: absolutePath,
+    INTERNAL_TLS_CLIENT_KEY_PATH: absolutePath,
+    INTERNAL_TLS_SERVER_CA_PATH: absolutePath,
     SESSION_COOKIE_NAME: z.string().min(1),
     LOGIN_ATTEMPT_COOKIE_NAME: z.string().min(1),
   })
@@ -31,6 +40,14 @@ export const webServerEnvSchema = z
         code: "custom",
         path: ["OIDC_REDIRECT_URI"],
         message: "OIDC_REDIRECT_URI must use HTTPS outside tests.",
+      });
+    }
+    if (new URL(env.OIDC_REDIRECT_URI).pathname !== "/api/auth/callback") {
+      context.addIssue({
+        code: "custom",
+        path: ["OIDC_REDIRECT_URI"],
+        message:
+          "OIDC_REDIRECT_URI must use the Caddy-protected callback route.",
       });
     }
   });
