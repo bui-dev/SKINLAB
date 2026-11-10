@@ -144,27 +144,27 @@ After the owner creates or selects the new empty monorepo remote, add it as `ori
 - Consumes: Root workspace scripts from Task 1.
 - Produces: `GET /health/live -> { status: "ok" }`; `GET /health/ready -> { status: "ready" | "not_ready", checks: Record<string, boolean> }`; `loadEnv(input: NodeJS.ProcessEnv): ApiEnv`; `loadWebServerEnv(input: NodeJS.ProcessEnv): WebServerEnv`; `createInternalTlsOptions(env: ApiEnv): FastifyHttpsOptions`. `ApiEnv` includes database/S3/timezone plus `OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_REQUIRED_ACR=2`, `TOKEN_ENCRYPTION_KEY`, `BFF_EXCHANGE_HMAC_KEY`, `INTERNAL_TLS_CERT_PATH`, `INTERNAL_TLS_KEY_PATH`, `INTERNAL_TLS_CLIENT_CA_PATH`, and `GATEWAY_CLIENT_CERT_FINGERPRINT`. `WebServerEnv` includes `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_REDIRECT_URI`, `OIDC_REQUIRED_ACR=2`, `API_INTERNAL_BASE_URL`, `BFF_EXCHANGE_HMAC_KEY`, `SESSION_COOKIE_NAME`, and `LOGIN_ATTEMPT_COOKIE_NAME`; none is exposed through `NEXT_PUBLIC_*`.
 
-- [ ] **Step 1: Write failing health and environment tests**
+- [x] **Step 1: Write failing health and environment tests**
 
 Test names: `returns_liveness_without_external_dependencies`, `rejects_missing_database_url`, `rejects_missing_auth_encryption_or_internal_tls_configuration`, `rejects_missing_web_oidc_callback_configuration`, and `does_not_expose_server_secrets`.
 
-- [ ] **Step 2: Run the API tests**
+- [x] **Step 2: Run the API tests**
 
 Run: `pnpm --filter @skinlab/api test -- health.controller.test.ts && pnpm --filter @skinlab/admin-web test -- src/test/env.test.ts`
 
 Expected: FAIL because the API package and controllers do not exist.
 
-- [ ] **Step 3: Implement the minimal Fastify-based Nest application**
+- [x] **Step 3: Implement the minimal Fastify-based Nest application**
 
 Use Zod for the complete `ApiEnv` and `WebServerEnv` contracts above. Require encryption/HMAC keys of the documented byte length, HTTPS redirect URI outside tests, absolute secret-file paths, and `CLINIC_TIMEZONE=Asia/Ho_Chi_Minh`. `createInternalTlsOptions` loads the API certificate/key and requires the configured Caddy client CA; no browser-facing code may import either server-env loader.
 
-- [ ] **Step 4: Run API tests and typecheck**
+- [x] **Step 4: Run API tests and typecheck**
 
 Run: `pnpm --filter @skinlab/api test && pnpm --filter @skinlab/api typecheck && pnpm --filter @skinlab/admin-web test -- src/test/env.test.ts && pnpm --filter @skinlab/admin-web typecheck`
 
 Expected: PASS with no TypeScript errors.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add api-skinlab admin-skinlab/src/config/env.ts admin-skinlab/.env.example admin-skinlab/src/test/env.test.ts
