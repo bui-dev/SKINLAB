@@ -396,32 +396,34 @@ with TTL-expired upsert, and zero-leak secret scan all passed before PR #10 was 
 - Consumes: `AuthenticatedUser`, audit recorder, S3 configuration.
 - Produces: `storePrivateObject(input: StoreObjectInput): Promise<StoredObjectRef>`; `createReadGrant(objectId: ObjectId, actor: AuthenticatedUser, ttlSeconds: number): Promise<ShortLivedReadUrl>`.
 
-- [ ] **Step 1: Write failing authorization and URL-expiry tests**
+- [x] **Step 1: Write failing authorization and URL-expiry tests**
 
 Cover a permitted doctor, forbidden receptionist, guessed key, expired URL, invalid MIME type, oversized file, and retry with the same idempotency key.
 
-- [ ] **Step 2: Run media tests against a MinIO Testcontainer**
+- [x] **Step 2: Run media tests against a MinIO Testcontainer**
 
 Run: `pnpm --filter @skinlab/api test:integration -- modules/media`
 
 Expected: FAIL because the media adapter is absent.
 
-- [ ] **Step 3: Implement private storage**
+- [x] **Step 3: Implement private storage**
 
 Keep buckets private, generate random opaque keys, record SHA-256 checksum and metadata, create short-lived signed reads only after domain authorization, and audit store/read actions.
 
-- [ ] **Step 4: Rerun tests**
+- [x] **Step 4: Rerun tests**
 
 Run: `pnpm --filter @skinlab/api test:integration -- modules/media`
 
 Expected: PASS; direct anonymous object access remains denied.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add api-skinlab/src/modules/media docker/local/compose.yaml
 git commit -m "feat(media): add private audited object storage"
 ```
+
+**Completion evidence:** root lint/typecheck/unit tests (74 tests passed across 15 files), API integration tests (29 tests passed across 9 suites), doctor-only scoped pre-signed URL grants (1-900s TTL), clinic-context enforcement (remote doctor access denied), path-traversal rejection (`..` and `//`), SHA-256 integrity metadata, immutable audit recording for store and read grants via `RecordAuditEvent`, MinIO container service with automated private bucket initialization, and zero-leak secret scan all passed.
 
 ### Task 7: Add idempotent scheduled-job infrastructure in clinic timezone
 

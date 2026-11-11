@@ -17,7 +17,7 @@
 | Order | Plan                                                                                              | Approved status                                                                                               |
 | ----: | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 |    A0 | [Appointment Prototype](./2026-11-08-00-appointment-prototype-a0.md)                              | Complete; accepted durable learning merged to `dev`; prototype code archived                                  |
-|     1 | [Foundation, Security, and Infrastructure](./2026-11-08-01-foundation-security-infrastructure.md) | Execution-detail approved; Tasks 1–5 complete; Tasks 6–9 authorized for synthetic delivery-team handover work |
+|     1 | [Foundation, Security, and Infrastructure](./2026-11-08-01-foundation-security-infrastructure.md) | Execution-detail approved; Tasks 1–6 complete; Tasks 7–9 authorized for synthetic delivery-team handover work |
 |     2 | [Appointments and Queue](./2026-11-08-02-appointments-queue.md)                                   | Revalidated from A0; execution still requires Foundation interfaces and separate authorization                |
 |     3 | [Clinical Records and Treatment Courses](./2026-11-08-03-clinical-records-treatment.md)           | Roadmap approved; revalidation required                                                                       |
 |     4 | [Packages, Payments, and Receipts](./2026-11-08-04-packages-payments-receipts.md)                 | Roadmap approved; revalidation required                                                                       |
@@ -34,7 +34,7 @@ Supporting review artifacts:
 
 ## Execution authorization
 
-Foundation Task 1, A0, and A0-driven Plan 2 revalidation completed on 2026-11-09. Foundation Tasks 2–3 completed on 2026-11-10 using fake-data local/staging only. Foundation Task 4, including the Task 4A gateway assertion adapter, completed on 2026-11-10 and merged into `dev` by PR #7 (`a72442b`). Foundation Task 5 (immutable audit recording and safe idempotency) completed on 2026-11-12 and merged into `dev` by PR #10 (`eb03862`). Later work remains subject to the dependency matrix, revalidation, and external gates; Tasks 4–5 remain provisional for fake-data local/staging only.
+Foundation Task 1, A0, and A0-driven Plan 2 revalidation completed on 2026-11-09. Foundation Tasks 2–3 completed on 2026-11-10 using fake-data local/staging only. Foundation Task 4, including the Task 4A gateway assertion adapter, completed on 2026-11-10 and merged into `dev` by PR #7 (`a72442b`). Foundation Task 5 (immutable audit recording and safe idempotency) completed on 2026-11-12 and merged into `dev` by PR #10 (`eb03862`). Foundation Task 6 (private object storage and scoped file access) completed on 2026-11-12. Later work remains subject to the dependency matrix, revalidation, and external gates; Tasks 4–6 remain provisional for fake-data local/staging only.
 
 ## Dependency order
 
