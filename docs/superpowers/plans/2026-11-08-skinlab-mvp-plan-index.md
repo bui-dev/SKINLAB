@@ -14,15 +14,15 @@
 
 ## Plan set
 
-| Order | Plan                                                                                              | Approved status                                                                                |
-| ----: | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-|    A0 | [Appointment Prototype](./2026-11-08-00-appointment-prototype-a0.md)                              | Complete; accepted durable learning merged to `dev`; prototype code archived                   |
+| Order | Plan                                                                                              | Approved status                                                                                               |
+| ----: | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+|    A0 | [Appointment Prototype](./2026-11-08-00-appointment-prototype-a0.md)                              | Complete; accepted durable learning merged to `dev`; prototype code archived                                  |
 |     1 | [Foundation, Security, and Infrastructure](./2026-11-08-01-foundation-security-infrastructure.md) | Execution-detail approved; Tasks 1–3 complete; Tasks 4–9 authorized for synthetic delivery-team handover work |
-|     2 | [Appointments and Queue](./2026-11-08-02-appointments-queue.md)                                   | Revalidated from A0; execution still requires Foundation interfaces and separate authorization |
-|     3 | [Clinical Records and Treatment Courses](./2026-11-08-03-clinical-records-treatment.md)           | Roadmap approved; revalidation required                                                        |
-|     4 | [Packages, Payments, and Receipts](./2026-11-08-04-packages-payments-receipts.md)                 | Roadmap approved; revalidation required                                                        |
-|     5 | [Inventory and Stocktake](./2026-11-08-05-inventory-stocktake.md)                                 | Roadmap approved; revalidation required                                                        |
-|     6 | [Compliance, Migration, and Go-Live](./2026-11-08-06-compliance-migration-go-live.md)             | Roadmap approved; external gates and revalidation required                                     |
+|     2 | [Appointments and Queue](./2026-11-08-02-appointments-queue.md)                                   | Revalidated from A0; execution still requires Foundation interfaces and separate authorization                |
+|     3 | [Clinical Records and Treatment Courses](./2026-11-08-03-clinical-records-treatment.md)           | Roadmap approved; revalidation required                                                                       |
+|     4 | [Packages, Payments, and Receipts](./2026-11-08-04-packages-payments-receipts.md)                 | Roadmap approved; revalidation required                                                                       |
+|     5 | [Inventory and Stocktake](./2026-11-08-05-inventory-stocktake.md)                                 | Roadmap approved; revalidation required                                                                       |
+|     6 | [Compliance, Migration, and Go-Live](./2026-11-08-06-compliance-migration-go-live.md)             | Roadmap approved; external gates and revalidation required                                                    |
 
 Supporting review artifacts:
 
@@ -34,7 +34,7 @@ Supporting review artifacts:
 
 ## Execution authorization
 
-Foundation Task 1, A0, and A0-driven Plan 2 revalidation completed on 2026-11-09. Foundation Tasks 2–3 completed on 2026-11-10 using fake-data local/staging only. Task 4A (gateway assertion adapter) is in implementation; it is not yet a completed Foundation Task. Later work remains subject to the dependency matrix, revalidation, and external gates.
+Foundation Task 1, A0, and A0-driven Plan 2 revalidation completed on 2026-11-09. Foundation Tasks 2–3 completed on 2026-11-10 using fake-data local/staging only. Foundation Task 4, including the Task 4A gateway assertion adapter, completed on 2026-11-10 and merged into `dev` by PR #7 (`a72442b`). Later work remains subject to the dependency matrix, revalidation, and external gates; Task 4 remains provisional for fake-data local/staging only.
 
 ## Dependency order
 
