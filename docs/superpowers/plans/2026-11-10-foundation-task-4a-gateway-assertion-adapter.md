@@ -1,5 +1,8 @@
 # Foundation Task 4A — Gateway Assertion Adapter Implementation Plan
 
+**Status:** Complete on 2026-11-10 — included in Foundation Task 4 PR #7,
+commit `a72442b`. Synthetic-data local/staging only.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Supply a verifiable, one-time gateway assertion so Task 4 can create browser sessions only for an approved device and access context without delivering the full Task 8 staging platform.
@@ -31,6 +34,7 @@
 ### Task 1: Persisted gateway-assertion verification
 
 **Files:**
+
 - Modify: `api-skinlab/prisma/schema.prisma`
 - Create: `api-skinlab/prisma/migrations/<timestamp>_gateway_assertion_nonces/migration.sql`
 - Create: `api-skinlab/src/modules/identity/infrastructure/gateway-assertion-repository.ts`
@@ -47,6 +51,7 @@
 ### Task 2: Minimal Caddy signer contract
 
 **Files:**
+
 - Create: `docker/gateway/Caddyfile.task4a`
 - Create: `docker/gateway/context-signer/README.md`
 - Create: `docker/gateway/context-signer/sign-assertion.mjs`
@@ -62,6 +67,7 @@
 ### Task 3: Session boundary and BFF completion
 
 **Files:**
+
 - Modify: `api-skinlab/src/modules/identity/http/session.controller.ts`
 - Modify: `api-skinlab/src/modules/identity/identity.module.ts`
 - Create: `api-skinlab/src/modules/identity/http/auth.guard.ts`
@@ -74,18 +80,19 @@
 
 **Interfaces:** API exposes BFF-only create/get/refresh/revoke session commands. BFF callback consumes the attempt, validates nonce hash and `acr=2`, then issues only an opaque session cookie.
 
-- [ ] Add failing tests for missing/forged/replayed gateway assertion, callback nonce mismatch, cross-origin refresh/logout, and absence of browser-readable tokens.
-- [ ] Implement the API commands/guard and BFF callback/logout/session/proxy adapters with fail-closed errors.
-- [ ] Run Task 4 full auth gate and commit `feat(auth): complete BFF session boundary`.
+- [x] Add failing tests for missing/forged/replayed gateway assertion, callback nonce mismatch, cross-origin refresh/logout, and absence of browser-readable tokens.
+- [x] Implement the API commands/guard and BFF callback/logout/session/proxy adapters with fail-closed errors.
+- [x] Run Task 4 full auth gate and commit `feat(auth): complete BFF session boundary`.
 
 ### Task 4: Task 4 closure
 
 **Files:**
+
 - Modify: `docs/governance/FOUNDATION_EXECUTION_AUTHORIZATION.md`
 - Modify: `docs/superpowers/plans/2026-11-08-skinlab-mvp-plan-index.md`
 - Modify: `.github/workflows/ci.yml`
 - Test: full root quality gate.
 
-- [ ] Add API integration and focused auth tests to CI quality gate.
-- [ ] Run lint, typecheck, unit, integration, BFF auth tests, secret scan, and build.
-- [ ] Perform independent review, record evidence, commit closure documentation, and mark Task 4 complete only if every gate is green.
+- [x] Add API integration and focused auth tests to CI quality gate.
+- [x] Run lint, typecheck, unit, integration, BFF auth tests, secret scan, and build.
+- [x] Perform independent review, record evidence, commit closure documentation, and mark Task 4 complete only if every gate is green.

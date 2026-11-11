@@ -217,6 +217,11 @@ git commit -m "feat(api): add postgres transaction foundation"
 
 ### Task 4: Implement OIDC authentication, MFA evidence, roles, and access context
 
+**Status:** Complete on 2026-11-10 — merged into `dev` by PR #7,
+commit `a72442b` (`feat(auth): complete Task 4 session boundary`). Scope
+remains synthetic-data local/staging only; this completion does not authorize
+real patient data or production deployment.
+
 **Files:**
 
 - Create: `docs/adr/0002-identity-session-and-access-boundary.md`
@@ -268,54 +273,59 @@ git commit -m "feat(api): add postgres transaction foundation"
 - Consumes: Task 2 auth/encryption/internal-TLS configuration, `RegisteredDevice`, database transactions, and a Caddy client certificate trusted by the API mTLS listener.
 - Produces: internal-only `createLoginAttempt(input: { state: string; nonce: string; codeVerifier: string; expiresAt: Instant }): Promise<{ attemptId: string }>`; one-time `consumeLoginAttempt(attemptId: string, returnedState: string): Promise<ConsumedLoginAttempt>`; `verifyAccessToken(token: string): Promise<VerifiedIdentity>`; `verifyGatewayContext(socket: TLSSocket, headers: GatewayHeaders): Promise<AccessContext>`; `authorizeRequest(identity: VerifiedIdentity, context: AccessContext, permission: Permission): AuthenticatedUser`; `createSessionFromOidc(input: CreateOidcSessionInput): Promise<UserSession>`; `getSession(sessionId: string): Promise<UserSession | null>`; `refreshSession(sessionId: string): Promise<UserSession>`; `revokeSession(sessionId: string, reason: string): Promise<void>`; web `issueLoginAttemptCookie(attemptId: string): Promise<string>`, `readLoginAttemptCookie(): Promise<string | null>`, `clearLoginAttemptCookie(): Promise<string>`, `issueSessionCookie(sessionId: string): Promise<string>`, `readSessionCookie(): Promise<string | null>`, and `clearSessionCookie(): Promise<string>`. Raw state/nonce/verifier traverse only the HMAC-authenticated internal BFF channel; the API hashes state/nonce and encrypts the verifier with `TOKEN_ENCRYPTION_KEY` before persistence. Browser cookies contain opaque IDs only; access/refresh tokens and rotation history remain server-side. Authorization requires `acr >= OIDC_REQUIRED_ACR`, role, registered device certificate fingerprint, and allowed clinic/remote context.
 
-- [ ] **Step 1: Record and provisionally approve the identity/access ADR**
+- [x] **Step 1: Record and provisionally approve the identity/access ADR**
 
 Compare the OIDC provider boundary, browser session/BFF behavior, token refresh, gateway trust headers, managed-device evidence, and failure/revocation behavior. Set ADR status to `Accepted` and approval scope to `Provisional — fake-data local/staging only; not ratified for real data/production`. Obtain independent AI security review, record Engineering Coordinator approval, and add the ADR with its scope to `docs/adr/README.md` before implementation.
 
-- [ ] **Step 2: Write and run failing authorization matrix tests**
+- [x] **Step 2: Write and run failing authorization matrix tests**
 
 Cover doctor at clinic on a registered device, receptionist outside clinic, remote admin with `acr=2`, `acr<2`, disabled user, forged context headers without the configured Caddy mTLS peer, unregistered device-certificate fingerprint, and expired token. Run `pnpm --filter @skinlab/api test -- authorize-request.test.ts mtls-gateway-context-verifier.test.ts`; expect FAIL.
 
-- [ ] **Step 3: Implement domain authorization and make its tests pass**
+- [x] **Step 3: Implement domain authorization and make its tests pass**
 
 Require issuer, audience, expiry, subject, role claims, `acr >= OIDC_REQUIRED_ACR`, registered-device state, and access context. Trust Caddy-supplied device/network headers only when the API TLS socket presents the configured Caddy client certificate chained to `INTERNAL_TLS_CLIENT_CA_PATH`; source range alone never authenticates a device or user. Rerun both focused tests; expect PASS.
 
-- [ ] **Step 4: Write and run failing login-attempt and session lifecycle integration tests**
+- [x] **Step 4: Write and run failing login-attempt and session lifecycle integration tests**
 
 Cover one-time state/nonce/PKCE attempt creation and consumption, wrong state, expiry, second consumption, OIDC login creation through the HMAC-authenticated BFF exchange, rejection of a direct/replayed bearer as a new browser session, opaque session lookup, refresh-token rotation, reuse of an already-rotated refresh token, disabled-user/global revocation, logout, expired session, and retry safety. Run `pnpm --filter @skinlab/api test:integration -- login-attempt.integration.test.ts session-lifecycle.integration.test.ts`; expect FAIL.
 
-- [ ] **Step 5: Implement server-side session persistence and lifecycle**
+- [x] **Step 5: Implement server-side session persistence and lifecycle**
 
 Add login-attempt/session schema and repositories, application services, and BFF-only controller endpoints authenticated with `BFF_EXCHANGE_HMAC_KEY`. Hash state/nonce/session IDs, encrypt PKCE verifiers and refresh tokens with `TOKEN_ENCRYPTION_KEY`, bind access context/device evidence, consume login attempts once, and make consume/refresh/revoke transactional. Rerun both integration tests; expect PASS.
 
-- [ ] **Step 6: Write and run failing deterministic token-verifier tests**
+- [x] **Step 6: Write and run failing deterministic token-verifier tests**
 
 Use a test issuer/JWKS to cover valid signature with `acr=2`, wrong issuer/audience, expired token, unknown key, JWKS key rotation, and missing/insufficient `acr`. Run `pnpm --filter @skinlab/api test:integration -- oidc-token-verifier.integration.test.ts`; expect FAIL.
 
-- [ ] **Step 7: Implement OIDC verification and make verifier tests pass**
+- [x] **Step 7: Implement OIDC verification and make verifier tests pass**
 
 Cache JWKS within bounded TTL, validate the full token contract, and return typed failures without token contents in logs. Rerun the verifier integration test; expect PASS.
 
-- [ ] **Step 8: Write and run failing BFF route/cookie tests**
+- [x] **Step 8: Write and run failing BFF route/cookie tests**
 
 Cover API-backed state/nonce/PKCE attempt creation and one-time consumption, a five-minute `HttpOnly; Secure; SameSite=Lax` login-attempt cookie required for the cross-site OIDC callback, a `HttpOnly; Secure; SameSite=Strict` opaque-session cookie after callback, essential `acr=2` request and callback verification, session refresh through the API, logout clearing both cookies, and client code never receiving a bearer/refresh token. Run `pnpm --filter @skinlab/admin-web test -- features/auth`; expect FAIL.
 
-- [ ] **Step 9: Implement the web BFF routes and opaque-cookie adapter**
+- [x] **Step 9: Implement the web BFF routes and opaque-cookie adapter**
 
 Implement login/callback/logout/session routes, server-only API session client, API-backed creation/consumption of the opaque login attempt, essential `acr=2` request/callback verification, updated `getSession`/`useSession`, and route protection in `src/proxy.ts`. Authenticate BFF-to-API login/session exchange requests with `BFF_EXCHANGE_HMAC_KEY`; never put state, nonce, PKCE verifier, client secret, or tokens in browser-readable storage. Rerun the focused web auth tests; expect PASS.
 
-- [ ] **Step 10: Run the complete auth gate**
+- [x] **Step 10: Run the complete auth gate**
 
 Run: `pnpm --filter @skinlab/api test -- modules/identity && pnpm --filter @skinlab/api test:integration -- modules/identity && pnpm --filter @skinlab/admin-web test -- features/auth && pnpm -r typecheck`
 
 Expected: all authorization, session, token, BFF, and type checks pass.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add docs/adr/README.md docs/adr/0002-identity-session-and-access-boundary.md packages/contracts/src/auth.ts api-skinlab/prisma api-skinlab/src/modules/identity admin-skinlab/src/features/auth admin-skinlab/src/app/api/auth admin-skinlab/src/proxy.ts
 git commit -m "feat(auth): enforce oidc mfa roles and access context"
 ```
+
+**Completion evidence:** independent security review resolved its findings;
+root lint/typecheck/unit tests, API Testcontainers integration tests, synthetic
+Caddy-to-signer-to-BFF-to-API gateway E2E, production build, and secret scan
+all passed before PR #7 was merged.
 
 ### Task 5: Add immutable audit recording and safe idempotency
 
