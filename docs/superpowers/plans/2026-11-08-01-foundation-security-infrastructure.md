@@ -329,6 +329,11 @@ all passed before PR #7 was merged.
 
 ### Task 5: Add immutable audit recording and safe idempotency
 
+**Status:** Complete on 2026-11-12 — merged into `dev` by PR #10,
+commit `eb03862` (`feat(audit): add immutable events and idempotent writes`). Scope
+remains synthetic-data local/staging only; this completion does not authorize
+real patient data or production deployment.
+
 **Files:**
 
 - Create: `api-skinlab/src/modules/audit/domain/audit-event.ts`
@@ -343,32 +348,36 @@ all passed before PR #7 was merged.
 - Consumes: `TransactionManager` from Task 3 and `AuthenticatedUser` from Task 4.
 - Produces: `recordAuditEvent(event: AuditEventInput, tx?: TransactionContext): Promise<void>`; `executeIdempotently<T>(scope: string, key: string, work: () => Promise<T>): Promise<T>`.
 
-- [ ] **Step 1: Write failing idempotency and immutability tests**
+- [x] **Step 1: Write failing idempotency and immutability tests**
 
 Assert the same key returns the first result without a second domain write, and no repository method exposes update/delete for `AuditEvent`.
 
-- [ ] **Step 2: Run the audit integration tests**
+- [x] **Step 2: Run the audit integration tests**
 
 Run: `pnpm --filter @skinlab/api test:integration -- modules/audit`
 
 Expected: FAIL because the audit module does not exist.
 
-- [ ] **Step 3: Implement append-only audit and idempotent execution**
+- [x] **Step 3: Implement append-only audit and idempotent execution**
 
 Store actor, subject, action, entity type/id, timestamp, request correlation, access context, and before/after references without placing secrets or full clinical images in logs.
 
-- [ ] **Step 4: Rerun tests**
+- [x] **Step 4: Rerun tests**
 
 Run: `pnpm --filter @skinlab/api test:integration -- modules/audit`
 
 Expected: PASS with one domain write and one audit event on retry.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add api-skinlab/src/modules/audit
 git commit -m "feat(audit): add immutable events and idempotent writes"
 ```
+
+**Completion evidence:** root lint/typecheck/unit tests, API Testcontainers
+integration tests, multi-level recursive payload sanitization, idempotency safe-retry
+with TTL-expired upsert, and zero-leak secret scan all passed before PR #10 was merged.
 
 ### Task 6: Add private object storage and scoped file access
 
