@@ -4,6 +4,30 @@ import { request as httpsRequest } from "node:https";
 
 import type { WebServerEnv } from "@/config/env";
 
+export type Role = "doctor" | "receptionist" | "admin";
+export type AccessContextKind = "clinic" | "remote";
+
+export type SessionInfo = {
+  subject: string;
+  role: Role;
+  accessContext: AccessContextKind;
+  expiresAt: string;
+};
+
+export type CreateSessionInput = {
+  accessToken: string;
+  refreshToken: string;
+  gatewayAssertion: unknown;
+};
+
+export type RefreshSessionInput = {
+  sessionId: string;
+  previousRefreshToken: string;
+  nextRefreshToken: string;
+  accessToken: string;
+  gatewayAssertion: unknown;
+};
+
 export type CreateBffExchangeHeadersInput = {
   key: string;
   method: string;
@@ -53,7 +77,11 @@ export class InternalApiSessionClient {
     this.fetchImpl = input.fetchImpl ?? fetch;
   }
 
-  async post<TResponse>(path: string, payload: unknown): Promise<TResponse> {
+  async post<TResponse>(
+    path: string,
+    payload: unknown,
+    correlationId?: string,
+  ): Promise<TResponse> {
     const body = JSON.stringify(payload);
     const headers = createBffExchangeHeaders({
       key: this.input.key,
@@ -63,16 +91,78 @@ export class InternalApiSessionClient {
       issuedAt: this.input.now(),
       nonce: this.input.createNonce(),
     });
+    const correlationHeader = correlationId
+      ? { "x-skinlab-correlation-id": correlationId }
+      : { "x-skinlab-correlation-id": randomUUID() };
     const response = await this.fetchImpl(new URL(path, this.input.baseUrl), {
       method: "POST",
       body,
-      headers: { "content-type": "application/json", ...headers },
+      headers: {
+        "content-type": "application/json",
+        ...headers,
+        ...correlationHeader,
+      },
     });
     if (!response.ok) {
       throw new Error("The internal API session request failed.");
     }
 
     return (await response.json()) as TResponse;
+  }
+
+  async createSession(
+    input: CreateSessionInput,
+    correlationId?: string,
+  ): Promise<{ sessionId: string; expiresAt: string }> {
+    return this.post<{ sessionId: string; expiresAt: string }>(
+      "/internal/sessions",
+      input,
+      correlationId,
+    );
+  }
+
+  async getSession(
+    sessionId: string,
+    correlationId?: string,
+  ): Promise<SessionInfo | null> {
+    return this.post<SessionInfo | null>(
+      "/internal/sessions/read",
+      { sessionId },
+      correlationId,
+    );
+  }
+
+  async getRefreshToken(
+    sessionId: string,
+    correlationId?: string,
+  ): Promise<{ refreshToken: string }> {
+    return this.post<{ refreshToken: string }>(
+      "/internal/sessions/refresh-token/read",
+      { sessionId },
+      correlationId,
+    );
+  }
+
+  async refreshSession(
+    input: RefreshSessionInput,
+    correlationId?: string,
+  ): Promise<{ expiresAt: string }> {
+    return this.post<{ expiresAt: string }>(
+      "/internal/sessions/refresh",
+      input,
+      correlationId,
+    );
+  }
+
+  async revokeSession(
+    sessionId: string,
+    correlationId?: string,
+  ): Promise<{ revoked: true }> {
+    return this.post<{ revoked: true }>(
+      "/internal/sessions/revoke",
+      { sessionId },
+      correlationId,
+    );
   }
 }
 

@@ -15,6 +15,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:gateway-e2e": "node --test docker/gateway/e2e/gateway-chain.test.mjs",
+    "test:e2e:foundation": "pnpm --filter @skinlab/api exec tsx --test ../tests/e2e/foundation-security.spec.ts",
     "build": "pnpm -r --if-present build"
   },
   "devDependencies": {

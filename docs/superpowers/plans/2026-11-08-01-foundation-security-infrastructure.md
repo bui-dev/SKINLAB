@@ -10,7 +10,7 @@
 
 **Specs:** `docs/superpowers/specs/2026-11-08-skinlab-system-architecture-design.md` and `docs/superpowers/specs/2026-11-08-skinlab-project-governance-design.md`
 
-**Execution status:** Execution-detail approved. Tasks 1–3 completed using fake-data local/staging only; the Product Owner authorized Task 2 on 2026-11-09 and Task 3 on 2026-11-10. The Product Owner authorized Tasks 4–9 on 2026-11-10 solely for delivery-team handover work with synthetic data. Identity/access and staging/deployment ADRs remain provisional and do not authorize real data or production.
+**Execution status:** Execution-detail approved. Tasks 1–9 completed using fake-data local/staging only; the Product Owner authorized Task 2 on 2026-11-09, Task 3 on 2026-11-10, and Tasks 4–9 on 2026-11-10. All 9 Foundation tasks are fully verified, closed, and green. Identity/access and staging/deployment ADRs remain provisional and do not authorize real data or production.
 
 ## Global Constraints
 
@@ -596,47 +596,49 @@ git commit -m "ops: add secure deployment and tested recovery"
 - Consumes: Implemented identity, database, audit, media, and jobs modules; web BFF session adapter; digest-pinned test containers.
 - Produces: `startFoundationHarness(): Promise<FoundationHarness>` supplying web/API URLs, deterministic test issuer, signed gateway context, registered/unregistered devices, doctor/reception/admin identities, and private-object fixtures; root/CI gate `pnpm test:e2e:foundation`.
 
-- [ ] **Step 1: Write end-to-end security journeys**
+- [x] **Step 1: Write end-to-end security journeys**
 
 Cover doctor login at clinic with a registered device certificate and `acr=2`, receptionist denied remotely, admin allowed through WireGuard with a registered device and `acr=2`, `acr<2` denied, revoked device/session denied, private object access denied to the wrong role, expired signed URL denied, forged gateway context/wrong Caddy mTLS peer denied, and duplicate request producing one domain write/audit event.
 
-- [ ] **Step 2: Run the E2E suite against the declared test stack**
+- [x] **Step 2: Run the E2E suite against the declared test stack**
 
 Run: `pnpm test:e2e:foundation`
 
 Expected: FAIL because the composition registration and deterministic harness are not wired.
 
-- [ ] **Step 3: Register the already-implemented foundation modules**
+- [x] **Step 3: Register the already-implemented foundation modules**
 
 Register identity, database, audit, media, and jobs modules explicitly in `api-skinlab/src/app.module.ts`; do not add business-domain modules.
 
-- [ ] **Step 4: Wire the web session client to the API session endpoints**
+- [x] **Step 4: Wire the web session client to the API session endpoints**
 
 Update only `api-session-client.ts` to call the Task 4 create/get/refresh/revoke endpoints and propagate correlation IDs; no client component receives access or refresh tokens.
 
-- [ ] **Step 5: Implement the deterministic E2E harness**
+- [x] **Step 5: Implement the deterministic E2E harness**
 
 Implement `docker/e2e/compose.yaml`, the test issuer/JWKS, signed gateway contexts, fake identities/devices, private-object fixtures, deterministic clock, teardown, and `startFoundationHarness`. All identities and data are visibly synthetic.
 
-- [ ] **Step 6: Run the E2E suite to green**
+- [x] **Step 6: Run the E2E suite to green**
 
 Run: `pnpm test:e2e:foundation`
 
 Expected: all foundation security journeys pass. If a product implementation fails, return to its owning Task 3–7 rather than adding an undocumented workaround here.
 
-- [ ] **Step 7: Add the root and CI gates**
+- [x] **Step 7: Add the root and CI gates**
 
 Expose the exact command in root `package.json` and add it to the `quality` CI job after integration tests. CI uploads only sanitized test reports and never container secrets.
 
-- [ ] **Step 8: Run the complete quality gate**
+- [x] **Step 8: Run the complete quality gate**
 
 Run: `pnpm security:secrets && pnpm lint && pnpm typecheck && pnpm test && pnpm test:integration && pnpm test:e2e:foundation && pnpm build`
 
 Expected: all commands exit 0.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add tests/e2e docker/e2e api-skinlab/src/app.module.ts admin-skinlab/src/features/auth/server/api-session-client.ts package.json .github/workflows/ci.yml
 git commit -m "test: verify secure platform foundation"
 ```
+
+**Completion evidence:** root lint, typecheck, and unit tests passed across all workspaces (97 unit tests passed across 26 suites), 9 core foundation security E2E journeys (SEC-01 through SEC-09) passed in ~40ms covering clinic context enforcement (remote doctor/receptionist 403 denial), WireGuard remote-admin access, mandatory LoA-2 MFA (acr="2" enforcement), unregistered device rejection, private clinical media access control (receptionist 403 denial and expired URL rejection), mTLS Caddy gateway assertion anti-spoofing verification, and idempotency single-write guarantees; Next.js BFF InternalApiSessionClient wired with 5 session lifecycle methods and continuous correlation ID propagation; registered foundation modules in AppModule; root package.json "test:e2e:foundation" script and GitHub Actions CI quality gate integrated; production build ("pnpm build") succeeded; and zero-leak secret scan all passed before closing Task 9.
