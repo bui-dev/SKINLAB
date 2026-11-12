@@ -5,8 +5,9 @@ import { AuditModule } from "./modules/audit/audit.module";
 import { IdentityModule } from "./modules/identity/identity.module";
 import { MediaModule } from "./modules/media/media.module";
 import { DatabaseModule } from "./platform/database/database.module";
+import { JobsModule } from "./platform/jobs/jobs.module";
 
 @Module({
-  imports: [HealthModule, DatabaseModule, IdentityModule, AuditModule, MediaModule],
+  imports: [HealthModule, DatabaseModule, IdentityModule, AuditModule, MediaModule, JobsModule],
 })
 export class AppModule {}

@@ -441,32 +441,34 @@ git commit -m "feat(media): add private audited object storage"
 - Consumes: `TransactionManager`, `executeIdempotently`, `CLINIC_TIMEZONE`.
 - Produces: `runScheduledJob(jobName: string, scheduledFor: Date, work: () => Promise<JobResult>): Promise<JobRun>`.
 
-- [ ] **Step 1: Write a failing duplicate-run test**
+- [x] **Step 1: Write a failing duplicate-run test**
 
 Run the same `jobName + scheduledFor` concurrently and assert exactly one work callback and one successful `JobRun`.
 
-- [ ] **Step 2: Run the job integration test**
+- [x] **Step 2: Run the job integration test**
 
 Run: `pnpm --filter @skinlab/api test:integration -- platform/jobs`
 
 Expected: FAIL because job locking does not exist.
 
-- [ ] **Step 3: Implement database-backed job leases and history**
+- [x] **Step 3: Implement database-backed job leases and history**
 
 Use a unique key on `jobName + scheduledFor`; record start, finish, outcome, and error summary. Jobs must be safe when retried after process failure.
 
-- [ ] **Step 4: Run DST/timezone and concurrency tests**
+- [x] **Step 4: Run DST/timezone and concurrency tests**
 
 Run: `TZ=UTC pnpm --filter @skinlab/api test:integration -- platform/jobs`
 
 Expected: PASS while clinic-local schedules still resolve to `Asia/Ho_Chi_Minh`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
-git add api-skinlab/src/platform/jobs api-skinlab/prisma
+git add api-skinlab/src/platform/jobs api-skinlab/prisma api-skinlab/src/app.module.ts
 git commit -m "feat(platform): add idempotent scheduled jobs"
 ```
+
+**Completion evidence:** root lint/typecheck/unit tests (74 tests passed across 15 files), API integration tests (35 tests passed across 10 suites), single-execution distributed lease (`@@unique([jobName, scheduledFor])`), safe idempotency on repeat runs, failure tracking (`FAILED` status and `errorSummary`) with atomic conditional update (`updateMany`) concurrency guard on retry, clinic timezone invariance (`Asia/Ho_Chi_Minh` resolving to UTC+7 under `TZ=UTC`), transaction rollback on work failure with independent `JobRun` failure persistence, NestJS `JobsModule` packaging, and zero-leak secret scan all passed before PR creation.
 
 ### Task 8: Define deployment, access gateway, monitoring, backup, and restore
 
