@@ -1,0 +1,14 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+  receiver: 'staging-null-receiver'
+
+receivers:
+  - name: 'staging-null-receiver'
+    webhook_configs: [] # Safe placeholder without secret webhooks
+

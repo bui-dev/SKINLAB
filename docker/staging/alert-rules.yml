@@ -1,0 +1,66 @@
+groups:
+  - name: skinlab-staging-alerts
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+
+      - alert: ReadinessFailed
+        expr: probe_success == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Readiness probe failed"
+          description: "Service readiness check failed for {{ $labels.instance }}."
+
+      - alert: BackupTooOld
+        expr: (time() - pgbackrest_last_backup_timestamp) > 900
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL backup older than 15 minutes"
+          description: "Last backup timestamp is older than RPO threshold (15 minutes)."
+
+      - alert: DiskPressure
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space low (< 15%)"
+          description: "Available disk space is critically low on {{ $labels.device }}."
+
+      - alert: MemoryPressure
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Memory pressure high"
+          description: "Available memory dropped below 10% on host."
+
+      - alert: PostgresHighConnections
+        expr: (pg_stat_database_numbackends / 100) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL connection pool near exhaustion (> 80%)"
+          description: "Active connections exceed 80% of max_connections."
+
+      - alert: RepeatedAuthDenial
+        expr: rate(skinlab_auth_denials_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spike in authentication denials"
+          description: "Multiple authentication rejections observed within 5 minutes."
+

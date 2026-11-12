@@ -1,0 +1,118 @@
+{
+  "realm": "skinlab-fake",
+  "enabled": true,
+  "displayName": "SkinLab Fake-Data Staging Realm",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "roles": {
+    "realm": [
+      { "name": "doctor", "description": "SkinLab Clinic Doctor Role" },
+      { "name": "receptionist", "description": "SkinLab Clinic Receptionist Role" },
+      { "name": "admin", "description": "SkinLab System Administrator Role" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "skinlab-web",
+      "name": "SkinLab Web BFF Client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "fake-web-client-secret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "redirectUris": [
+        "https://localhost:443/api/auth/callback",
+        "https://127.0.0.1:443/api/auth/callback",
+        "https://gateway:443/api/auth/callback"
+      ],
+      "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "email"],
+      "protocolMappers": [
+        {
+          "name": "audience-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "skinlab-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "skinlab-api",
+      "name": "SkinLab Backend API Resource",
+      "enabled": true,
+      "bearerOnly": true
+    }
+  ],
+  "users": [
+    {
+      "username": "doctor.fake",
+      "email": "doctor.fake@skinlab.local",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Synthetic",
+      "lastName": "Doctor",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DoctorFakePass123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["doctor"]
+    },
+    {
+      "username": "reception.fake",
+      "email": "reception.fake@skinlab.local",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Synthetic",
+      "lastName": "Receptionist",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ReceptionFakePass123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["receptionist"]
+    },
+    {
+      "username": "admin.fake",
+      "email": "admin.fake@skinlab.local",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Synthetic",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "AdminFakePass123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ],
+  "authenticationFlows": [
+    {
+      "alias": "browser-loa2",
+      "description": "Browser flow requiring LoA 2 MFA enrollment",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false
+    }
+  ]
+}
+

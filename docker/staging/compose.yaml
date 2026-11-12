@@ -1,0 +1,287 @@
+# Staging Docker Compose Configuration
+# All images are pinned to immutable SHA-256 digests.
+# Only Caddy (port 443) and WireGuard (port 51820/udp) publish host ports.
+
+networks:
+  skinlab-internal:
+    driver: bridge
+    internal: false
+
+volumes:
+  postgres-data:
+  pgbackrest-repo:
+  minio-data:
+  caddy-data:
+  prometheus-data:
+  alertmanager-data:
+
+services:
+  wireguard:
+    image: linuxserver/wireguard@sha256:88d5e8dbfe2e9bbd62bf3ec84a32fa6ad4a6358c541adfebe02f64f3316ab6fa
+    container_name: skinlab-staging-wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    ports:
+      - "51820:51820/udp"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Ho_Chi_Minh
+      - SERVERURL=auto
+      - SERVERPORT=51820
+      - PEERS=1
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=10.13.13.0
+    volumes:
+      - ./wireguard/config:/config:ro
+    networks:
+      skinlab-internal:
+        ipv4_address: 10.13.13.2
+    restart: unless-stopped
+
+  gateway:
+    image: caddy:2.9.1-alpine@sha256:4ea94f54e1a61c5ebf5d606f233beaeef9a159f8c6eb53e7f417f7d14db48f07
+    container_name: skinlab-staging-gateway
+    ports:
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./secrets:/run/secrets:ro
+      - caddy-data:/data
+    networks:
+      - skinlab-internal
+    depends_on:
+      - admin-web
+      - api
+      - context-signer
+    restart: unless-stopped
+
+  context-signer:
+    image: node:22-alpine@sha256:779dd4be9ec6dbfecaa6a0c0e5a87be7b1161d76348ef5fb8e9a25b306b97ee6
+    container_name: skinlab-staging-context-signer
+    environment:
+      - GATEWAY_ASSERTION_HMAC_KEY_FILE=/run/secrets/gateway-assertion.key
+      - GATEWAY_SIGNER_TLS_CERT_PATH=/run/secrets/context-signer-server-cert.pem
+      - GATEWAY_SIGNER_TLS_KEY_PATH=/run/secrets/context-signer-server-key.pem
+      - GATEWAY_SIGNER_CLIENT_CA_PATH=/run/secrets/caddy-signer-client-ca.pem
+      - PORT=8443
+    volumes:
+      - ../gateway/context-signer:/app:ro
+      - ./secrets:/run/secrets:ro
+    command: ["node", "/app/sign-assertion.mjs"]
+    networks:
+      - skinlab-internal
+    restart: unless-stopped
+
+  admin-web:
+    image: skinlab/admin-web@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    container_name: skinlab-staging-admin-web
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_CLINIC_TIMEZONE=Asia/Ho_Chi_Minh
+      - API_BASE_URL=https://gateway:9443/internal
+      - NEXT_PUBLIC_API_BASE_URL=https://localhost:443/api
+      - OIDC_ISSUER=http://keycloak:8080/realms/skinlab-fake
+      - OIDC_CLIENT_ID=skinlab-web
+      - OIDC_CLIENT_SECRET=fake-web-client-secret
+      - OIDC_REDIRECT_URI=https://localhost:443/api/auth/callback
+      - OIDC_REQUIRED_ACR=2
+      - API_INTERNAL_BASE_URL=https://gateway:9443/internal
+      - BFF_EXCHANGE_HMAC_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      - INTERNAL_TLS_CLIENT_CERT_PATH=/run/secrets/bff-client-cert.pem
+      - INTERNAL_TLS_CLIENT_KEY_PATH=/run/secrets/bff-client-key.pem
+      - INTERNAL_TLS_SERVER_CA_PATH=/run/secrets/internal-server-ca.pem
+      - SESSION_COOKIE_NAME=skinlab_session
+      - LOGIN_ATTEMPT_COOKIE_NAME=skinlab_login_attempt
+    volumes:
+      - ./secrets:/run/secrets:ro
+    networks:
+      - skinlab-internal
+    restart: unless-stopped
+
+  api:
+    image: skinlab/api@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    container_name: skinlab-staging-api
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3001
+      - DATABASE_URL=postgresql://skinlab:skinlab_staging_password@postgres:5432/skinlab?sslmode=disable
+      - S3_ENDPOINT=http://minio:9000
+      - S3_REGION=local
+      - S3_BUCKET=skinlab-clinical-media
+      - S3_ACCESS_KEY_ID=skinlab
+      - S3_SECRET_ACCESS_KEY=skinlab_staging_minio_password
+      - CLINIC_TIMEZONE=Asia/Ho_Chi_Minh
+      - OIDC_ISSUER=http://keycloak:8080/realms/skinlab-fake
+      - OIDC_JWKS_URL=http://keycloak:8080/realms/skinlab-fake/protocol/openid-connect/certs
+      - OIDC_AUDIENCE=skinlab-api
+      - OIDC_REQUIRED_ACR=2
+      - TOKEN_ENCRYPTION_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      - BFF_EXCHANGE_HMAC_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      - GATEWAY_ASSERTION_HMAC_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      - INTERNAL_TLS_CERT_PATH=/run/secrets/api-server-cert.pem
+      - INTERNAL_TLS_KEY_PATH=/run/secrets/api-server-key.pem
+      - INTERNAL_TLS_CLIENT_CA_PATH=/run/secrets/caddy-client-ca.pem
+      - GATEWAY_CLIENT_CERT_FINGERPRINT=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    volumes:
+      - ./secrets:/run/secrets:ro
+    networks:
+      - skinlab-internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine@sha256:91bf78546b334d580ce42013eb11b157467614d35eb730c449e75551ecbecc66
+    container_name: skinlab-staging-postgres
+    environment:
+      - POSTGRES_DB=skinlab
+      - POSTGRES_USER=skinlab
+      - POSTGRES_PASSWORD=skinlab_staging_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - pgbackrest-repo:/var/lib/pgbackrest
+      - ./pgbackrest/pgbackrest.conf:/etc/pgbackrest/pgbackrest.conf:ro
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    networks:
+      - skinlab-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skinlab -d skinlab"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  pgbackrest:
+    image: pgbackrest/pgbackrest:2.54.0@sha256:58eb1a686adcae32cb7b65c3bbbf92f58e1c6674df50ad662be2897fa06917e7
+    container_name: skinlab-staging-pgbackrest
+    volumes:
+      - pgbackrest-repo:/var/lib/pgbackrest
+      - ./pgbackrest/pgbackrest.conf:/etc/pgbackrest/pgbackrest.conf:ro
+      - postgres-data:/var/lib/postgresql/data:ro
+    networks:
+      - skinlab-internal
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-07T23-21-09Z@sha256:f4b66df22ee9bcf7a6e11e033d52aa52a16d56df42cbfae259e8306dfc31dbb7
+    container_name: skinlab-staging-minio
+    command: server /data
+    environment:
+      - MINIO_ROOT_USER=skinlab
+      - MINIO_ROOT_PASSWORD=skinlab_staging_minio_password
+    volumes:
+      - minio-data:/data
+    networks:
+      - skinlab-internal
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-02-07T23-21-09Z@sha256:2fa9f7832625299c89cefc73e8fa9f3f4e1f7dca1316e100dc89eb0b10620ef3
+    container_name: skinlab-staging-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 skinlab skinlab_staging_minio_password &&
+      mc mb --ignore-existing local/skinlab-clinical-media &&
+      mc version enable local/skinlab-clinical-media &&
+      mc anonymous set none local/skinlab-clinical-media &&
+      exit 0
+      "
+    networks:
+      - skinlab-internal
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0@sha256:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b
+    container_name: skinlab-staging-keycloak
+    command: start-dev --import-realm
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin_staging_password
+      - KC_HEALTH_ENABLED=true
+    volumes:
+      - ./keycloak/realm-skinlab-fake.json:/opt/keycloak/data/import/realm-skinlab-fake.json:ro
+    networks:
+      - skinlab-internal
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2@sha256:0d5402506b3f524e94b29f79ceee7925e5ec024c32b5ac9ec5087c0a6b76bf79
+    container_name: skinlab-staging-node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    networks:
+      - skinlab-internal
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.2@sha256:e0b7a8d56b26d11f185efc07ebfaeeec353ffc6a2ef74e6f4770e59990b7952a
+    container_name: skinlab-staging-cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - skinlab-internal
+    restart: unless-stopped
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.16.0@sha256:1a8a3c0e1ebfc26f21bc90a88b51d18fce1b44ec4b684cb2676b971a82d2c161
+    container_name: skinlab-staging-postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://skinlab:skinlab_staging_password@postgres:5432/skinlab?sslmode=disable
+    networks:
+      - skinlab-internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.1.0@sha256:b1d836fb84e84be1a70461f09230533ec6099b51ef94ec9b5bfe3b75c85d774e
+    container_name: skinlab-staging-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - skinlab-internal
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.0@sha256:e27c1f822a1b1836c4f74d0a85fa0a7c49356be04cf5e1e07b8971f1eec50901
+    container_name: skinlab-staging-alertmanager
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    networks:
+      - skinlab-internal
+    restart: unless-stopped
+

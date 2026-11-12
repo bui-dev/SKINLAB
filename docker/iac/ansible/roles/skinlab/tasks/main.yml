@@ -1,0 +1,40 @@
+---
+# Idempotent provisioning tasks for SkinLab Staging host
+
+- name: Ensure skinlab system group exists
+  ansible.builtin.group:
+    name: "{{ skinlab_group }}"
+    state: present
+
+- name: Ensure skinlab system user exists
+  ansible.builtin.user:
+    name: "{{ skinlab_user }}"
+    group: "{{ skinlab_group }}"
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+    state: present
+
+- name: Create required directory structure with strict permissions
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ skinlab_user }}"
+    group: "{{ skinlab_group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ skinlab_install_dir }}", mode: "0755" }
+    - { path: "{{ skinlab_install_dir }}/secrets", mode: "0700" }
+    - { path: "{{ skinlab_install_dir }}/wireguard/config", mode: "0700" }
+    - { path: "{{ skinlab_install_dir }}/pgbackrest", mode: "0750" }
+
+- name: Verify external secrets exist
+  ansible.builtin.stat:
+    path: "{{ skinlab_install_dir }}/secrets/caddy-server-cert.pem"
+  register: server_cert_stat
+
+- name: Warn if certificate secrets missing
+  ansible.builtin.debug:
+    msg: "WARNING: caddy-server-cert.pem is not present. Mount secrets before starting containers."
+  when: not server_cert_stat.stat.exists
+
