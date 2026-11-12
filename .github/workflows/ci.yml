@@ -41,6 +41,8 @@ jobs:
         run: pnpm --filter @skinlab/api test:integration
       - name: Gateway mTLS end-to-end test
         run: pnpm test:gateway-e2e
+      - name: Foundation E2E security tests
+        run: pnpm test:e2e:foundation
       - name: Build
         run: pnpm build
 

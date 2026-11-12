@@ -71,6 +71,70 @@ describe("InternalApiSessionClient", () => {
       client.post("/internal/login-attempts", { state: "state-01" }),
     ).resolves.toEqual({ attemptId: "attempt-01" });
   });
+
+  it("handles_all_session_lifecycle_methods_with_correlation_id", async () => {
+    let lastUrl = "";
+    let lastBody = "";
+    let lastHeaders: HeadersInit = {};
+    const fetchImpl = async (input: URL | RequestInfo, init?: RequestInit) => {
+      lastUrl = input.toString();
+      lastBody = init?.body as string;
+      lastHeaders = init?.headers ?? {};
+      return new Response(
+        JSON.stringify({
+          success: true,
+          sessionId: "sess-01",
+          expiresAt: "2026-11-10T10:00:00.000Z",
+          refreshToken: "ref-01",
+          revoked: true,
+          subject: "doc-01",
+          role: "doctor",
+          accessContext: "clinic",
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      );
+    };
+    const client = new InternalApiSessionClient({
+      baseUrl: "https://api.skinlab.test",
+      key,
+      now: () => new Date("2026-11-10T09:00:00.000Z"),
+      createNonce: () => "nonce-01",
+      fetchImpl,
+    });
+
+    await client.createSession(
+      { accessToken: "at", refreshToken: "rt", gatewayAssertion: {} },
+      "corr-01",
+    );
+    expect(lastUrl).toBe("https://api.skinlab.test/internal/sessions");
+    expect(lastHeaders).toMatchObject({
+      "x-skinlab-correlation-id": "corr-01",
+    });
+
+    await client.getSession("sess-01");
+    expect(lastUrl).toBe("https://api.skinlab.test/internal/sessions/read");
+    expect(lastBody).toBe('{"sessionId":"sess-01"}');
+
+    await client.getRefreshToken("sess-01");
+    expect(lastUrl).toBe(
+      "https://api.skinlab.test/internal/sessions/refresh-token/read",
+    );
+
+    await client.refreshSession({
+      sessionId: "sess-01",
+      previousRefreshToken: "p",
+      nextRefreshToken: "n",
+      accessToken: "a",
+      gatewayAssertion: {},
+    });
+    expect(lastUrl).toBe("https://api.skinlab.test/internal/sessions/refresh");
+
+    await client.revokeSession("sess-01");
+    expect(lastUrl).toBe("https://api.skinlab.test/internal/sessions/revoke");
+  });
 });
 
 describe("decodeGatewayAssertionHeader", () => {
