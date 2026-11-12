@@ -111,3 +111,21 @@ model GatewayAssertionNonce {
   @@index([expiresAt])
   @@map("gateway_assertion_nonces")
 }
+
+model JobRun {
+  id           String    @id @default(cuid())
+  jobName      String
+  scheduledFor DateTime
+  startedAt    DateTime  @default(now())
+  finishedAt   DateTime?
+  status       String    // "RUNNING", "COMPLETED", "FAILED"
+  outcome      Json?
+  errorSummary String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([jobName, scheduledFor])
+  @@index([status])
+  @@index([scheduledFor])
+  @@map("job_runs")
+}
