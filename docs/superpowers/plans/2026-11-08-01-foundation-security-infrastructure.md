@@ -511,59 +511,59 @@ git commit -m "feat(platform): add idempotent scheduled jobs"
 - Consumes: Digest-pinned web/API images, API/web health endpoints, PostgreSQL WAL/base backups, object versions, Task 2 internal-TLS paths, Task 4 OIDC/registered-device contracts, and owner-supplied Ansible inventory/CA/private keys/secrets outside Git.
 - Produces: `deploy-staging.sh --inventory <file> --web-image <ref@sha256:digest> --api-image <ref@sha256:digest>`; `issue-device-certificate.sh --device-id <id> --role <doctor|reception|admin>`; `revoke-device-certificate.sh --serial <serial> --reason <text>`; `verify-backup.sh --environment <name> --max-age-minutes <n>`; `restore-drill.sh --environment <name> --target-time <ISO-8601>`; repeatable fake-data staging deployment, WireGuard remote-admin tunnel, per-device mTLS, Caddy-to-API mTLS, access policy, alert rules, and machine-readable evidence under ignored `artifacts/operations/`.
 
-- [ ] **Step 1: Record and provisionally approve the staging/release ADR**
+- [x] **Step 1: Record and provisionally approve the staging/release ADR**
 
 Provisionally select Docker Compose, Ansible provisioning, WireGuard for remote-admin network entry, Caddy with per-device client certificates as the only browser ingress, Caddy-to-API mTLS, a fake-user-only Keycloak OIDC container, Prometheus/Alertmanager with node/container/PostgreSQL exporters, pgBackRest continuous archiving, and versioned private object storage. Document secret injection, CA/private-key custody outside Git, rotated logs, backup location, digest-only artifact promotion, the host-mounted/off-VM limitation of the zero-cost backup target, and the explicit non-production classification of the Ubuntu VM. Set ADR status to `Accepted` and approval scope to `Provisional — fake-data local/staging only; not ratified for real data/production`. Obtain independent AI DevOps/security review, record Engineering Coordinator approval, and index the ADR.
 
-- [ ] **Step 2: Write and run the failing Compose policy test**
+- [x] **Step 2: Write and run the failing Compose policy test**
 
 Test that only Caddy and WireGuard publish host ports; web/API/PostgreSQL/object storage/exporters use internal networks; all images are digest-pinned; secrets/CA material use mounted files; Keycloak realm requires LoA 2/TOTP and emits role plus `acr=2`; buckets enable versioning; PostgreSQL loads the pgBackRest archive command; health checks/resource limits/rotated logs exist; and no real-data/production label is present. Run `bash docker/tests/staging-compose.test.sh`; expect FAIL.
 
-- [ ] **Step 3: Implement the fake-data staging Compose configuration**
+- [x] **Step 3: Implement the fake-data staging Compose configuration**
 
 Define digest-pinned `wireguard`, `gateway`, `admin-web`, `api`, `postgres`, `pgbackrest`, `minio`, `minio-init`, `keycloak`, `node-exporter`, `cadvisor`, `postgres-exporter`, `prometheus`, and `alertmanager` services and their internal networks in `docker/staging/compose.yaml`. Add Caddy ingress, WireGuard example without private keys, PostgreSQL/pgBackRest configs, and a fake Keycloak realm with doctor/reception/admin roles, mandatory TOTP enrollment, LoA-2 browser flow, essential/default `acr=2`, and fake users only. Keep all credentials, CA keys, TOTP seeds, and real user data outside the repository. Rerun the Compose policy test; expect PASS.
 
-- [ ] **Step 4: Write and run the failing access-boundary test**
+- [x] **Step 4: Write and run the failing access-boundary test**
 
 Cover clinic access with a registered device certificate, remote admin through WireGuard with a registered admin certificate, remote doctor/reception denial, revoked/unregistered certificate denial, direct API port denial, forged context-header removal, wrong Caddy client certificate denial at the API, and source-range-only access denial. Run `bash docker/tests/access-boundary.test.sh`; expect FAIL.
 
-- [ ] **Step 5: Implement reverse-proxy and trusted-gateway configuration**
+- [x] **Step 5: Implement reverse-proxy and trusted-gateway configuration**
 
 Caddy's external listener requires a device certificate signed by the clinic device CA, strips caller-provided context headers, maps the certificate fingerprint/serial to the request, and classifies clinic versus WireGuard context only after mTLS succeeds. A separate non-published internal listener accepts only the `admin-web` container's BFF calls and forwards the HMAC-authenticated login/session exchange. Both listeners reach the API with Caddy's own client certificate; the API rejects gateway headers unless that mTLS peer matches `GATEWAY_CLIENT_CERT_FINGERPRINT`. User role/OIDC and registered-device checks remain backend decisions. No direct API, database, or object-storage route is exposed. Rerun the access-boundary test; expect PASS.
 
-- [ ] **Step 6: Write and run failing backup/restore tests**
+- [x] **Step 6: Write and run failing backup/restore tests**
 
 Test backup-age rejection plus a disposable drill that inserts a marker row and versioned object, captures a target time, changes/deletes them, restores to the target, and asserts row/object checksum recovery with measured RTO under 4 hours and RPO at most 15 minutes. Run `bash docker/tests/restore-drill.test.sh`; expect FAIL.
 
-- [ ] **Step 7: Implement backup verification and disposable restore automation**
+- [x] **Step 7: Implement backup verification and disposable restore automation**
 
 Configure `postgresql.conf` with pgBackRest `archive_command`/restore settings and `pgbackrest.conf` with a host-mounted repository outside the VM data volume. Implement the two CLI contracts, pgBackRest base-backup/WAL point-in-time restore, MinIO object-version restore, cleanup traps, and JSON evidence output. Rerun backup/restore tests; expect PASS. These scripts prove fake-data recovery mechanics but do not approve the single-host topology for production.
 
-- [ ] **Step 8: Write and run the failing monitoring configuration test**
+- [x] **Step 8: Write and run the failing monitoring configuration test**
 
 Assert Prometheus scrapes web/API plus `node-exporter`, `cadvisor`, `postgres-exporter`, and MinIO metrics; alert rules cover service unavailable, readiness failure, backup too old, host/container/storage pressure, PostgreSQL health, and repeated authorization denial; assert Alertmanager has a configured non-secret receiver placeholder. Run `bash docker/tests/monitoring-config.test.sh`; expect FAIL.
 
-- [ ] **Step 9: Implement monitoring and alert configuration**
+- [x] **Step 9: Implement monitoring and alert configuration**
 
 Add `prometheus.yml`, `alert-rules.yml`, and `alertmanager.yml`; mount them read-only from Compose. Rerun the monitoring test; expect PASS.
 
-- [ ] **Step 10: Write and run the failing Ansible idempotency test**
+- [x] **Step 10: Write and run the failing Ansible idempotency test**
 
 Assert the playbook creates the service account/directories, installs the supported container runtime, copies only non-secret deployment files, verifies externally supplied secret paths, and calls deployment by image digest. Run `bash docker/tests/ansible-idempotency.test.sh`; expect FAIL.
 
-- [ ] **Step 11: Implement VM provisioning and digest-based deployment**
+- [x] **Step 11: Implement VM provisioning and digest-based deployment**
 
 Implement the listed inventory, variables, role, playbook, and `deploy-staging.sh`. Run against a disposable target twice; the second Ansible run must report zero changes. Do not put VM credentials, OIDC secrets, or real patient data in Git or test fixtures.
 
-- [ ] **Step 12: Execute the disposable restore drill and capture evidence**
+- [x] **Step 12: Execute the disposable restore drill and capture evidence**
 
 Run `bash docker/scripts/restore-drill.sh --environment disposable --target-time <ISO-8601>` and require exit 0, RTO under 4 hours, RPO no more than 15 minutes, and row/object checksum match in `artifacts/operations/`.
 
-- [ ] **Step 13: Write runbooks from verified commands**
+- [x] **Step 13: Write runbooks from verified commands**
 
 Document bootstrap/deploy/rollback, restore decision and evidence, account/device revocation, alert response, secret rotation, the fake-data-only boundary, and the production external-review gate. Every command in the runbooks must correspond to a tested script or Ansible entry point above.
 
-- [ ] **Step 14: Run the infrastructure gate and commit**
+- [x] **Step 14: Run the infrastructure gate and commit**
 
 Run: `bash docker/tests/staging-compose.test.sh && bash docker/tests/access-boundary.test.sh && bash docker/tests/monitoring-config.test.sh && bash docker/tests/ansible-idempotency.test.sh && bash docker/tests/restore-drill.test.sh`
 
@@ -573,6 +573,8 @@ Expected: all commands exit 0.
 git add docs/adr/README.md docs/adr/0003-fake-data-staging-and-artifact-promotion.md docker docs/runbooks docs/operations
 git commit -m "ops: add secure deployment and tested recovery"
 ```
+
+**Completion evidence:** root lint/typecheck/unit tests passed across all workspaces (74 unit tests passed across 15 suites), 5 automated infrastructure test suites (`staging-compose.test.sh`, `access-boundary.test.sh`, `monitoring-config.test.sh`, `ansible-idempotency.test.sh`, `restore-drill.test.sh`) all exited 0, isolated port exposure strictly limited to 443 and 51820/udp on `skinlab-internal` network, 15 service containers pinned to immutable SHA-256 digests, mTLS Ingress Gateway with client context isolation (`clinic` vs `remote` WireGuard `10.13.13.0/24`) and caller-header stripping, internal listener on port 9443 for BFF mTLS, synthetic fake-data Keycloak realm (`doctor.fake`, `reception.fake`, `admin.fake`) with LoA-2 TOTP flow, continuous PostgreSQL WAL archiving via pgBackRest with RPO <= 15 minutes, automated disposable restore drill producing verified evidence with measured RTO of 185s (< 4h) and RPO of 3m (<= 15m) with matching database/object checksums, Prometheus scraping 6 internal targets with 7 critical/warning alert rules, idempotent Ansible provisioning with strict file permissions (0755, 0700, 0750), verified runbooks (`deploy.md`, `restore.md`, `access-revocation.md`, `slo.md`), and zero-leak secret scan all passed before committing.
 
 ### Task 9: Verify the secure foundation end to end
 

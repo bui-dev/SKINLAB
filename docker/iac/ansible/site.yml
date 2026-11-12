@@ -1,0 +1,7 @@
+---
+- name: Provision SkinLab Staging Infrastructure
+  hosts: staging
+  become: true
+  roles:
+    - skinlab
+

@@ -1,0 +1,118 @@
+{
+	admin off
+	auto_https off
+}
+
+# Unified Ingress listener for Clinic Workstations & Remote Admin (Port 443)
+https://:443 {
+	tls /run/secrets/caddy-server-cert.pem /run/secrets/caddy-server-key.pem {
+		client_auth {
+			mode require_and_verify
+			trust_pool file /run/secrets/clinic-device-ca-bundle.pem
+		}
+	}
+
+	# Route 1: Remote Admin connecting through WireGuard VPN Subnet (10.13.13.0/24)
+	@authFromWireguard {
+		path /api/auth/callback /api/auth/refresh
+		remote_ip 10.13.13.0/24
+	}
+	route @authFromWireguard {
+		# Strip caller-controlled headers to prevent spoofing
+		request_header -X-SkinLab-Gateway-Assertion
+		request_header -X-SkinLab-Verified-Device-Fingerprint
+		request_header -X-SkinLab-Verified-Access-Context
+
+		forward_auth https://context-signer:8443 {
+			uri /sign
+			transport http {
+				tls
+				tls_client_auth /run/secrets/caddy-signer-client-cert.pem /run/secrets/caddy-signer-client-key.pem
+				tls_trust_pool file /run/secrets/context-signer-server-ca.pem
+				tls_server_name context-signer
+			}
+			header_up X-SkinLab-Verified-Device-Fingerprint {tls_client_fingerprint}
+			header_up X-SkinLab-Verified-Access-Context remote
+			header_up X-SkinLab-Original-Method {method}
+			header_up X-SkinLab-Original-Path {path}
+			copy_headers X-SkinLab-Gateway-Assertion
+		}
+
+		reverse_proxy https://admin-web:3000 {
+			transport http {
+				tls
+				tls_trust_pool file /run/secrets/internal-server-ca.pem
+				tls_server_name admin-web
+			}
+		}
+	}
+
+	# Route 2: Clinic Personnel connecting from Clinic Workstations
+	@authFromClinic {
+		path /api/auth/callback /api/auth/refresh
+		not remote_ip 10.13.13.0/24
+	}
+	route @authFromClinic {
+		# Strip caller-controlled headers to prevent spoofing
+		request_header -X-SkinLab-Gateway-Assertion
+		request_header -X-SkinLab-Verified-Device-Fingerprint
+		request_header -X-SkinLab-Verified-Access-Context
+
+		forward_auth https://context-signer:8443 {
+			uri /sign
+			transport http {
+				tls
+				tls_client_auth /run/secrets/caddy-signer-client-cert.pem /run/secrets/caddy-signer-client-key.pem
+				tls_trust_pool file /run/secrets/context-signer-server-ca.pem
+				tls_server_name context-signer
+			}
+			header_up X-SkinLab-Verified-Device-Fingerprint {tls_client_fingerprint}
+			header_up X-SkinLab-Verified-Access-Context clinic
+			header_up X-SkinLab-Original-Method {method}
+			header_up X-SkinLab-Original-Path {path}
+			copy_headers X-SkinLab-Gateway-Assertion
+		}
+
+		reverse_proxy https://admin-web:3000 {
+			transport http {
+				tls
+				tls_trust_pool file /run/secrets/internal-server-ca.pem
+				tls_server_name admin-web
+			}
+		}
+	}
+
+	# Default reverse proxy to Next.js BFF for all other UI routes
+	reverse_proxy https://admin-web:3000 {
+		transport http {
+			tls
+			tls_trust_pool file /run/secrets/internal-server-ca.pem
+			tls_server_name admin-web
+		}
+	}
+}
+
+# Internal listener for BFF-to-API communication (Port 9443)
+https://:9443 {
+	tls /run/secrets/caddy-server-cert.pem /run/secrets/caddy-server-key.pem {
+		client_auth {
+			mode require_and_verify
+			trust_pool file /run/secrets/bff-client-ca.pem
+		}
+	}
+
+	@internalApi path /internal/*
+	handle @internalApi {
+		reverse_proxy https://api:3001 {
+			transport http {
+				tls
+				tls_client_auth /run/secrets/caddy-api-client-cert.pem /run/secrets/caddy-api-client-key.pem
+				tls_trust_pool file /run/secrets/internal-server-ca.pem
+				tls_server_name api
+			}
+		}
+	}
+
+	respond "Not found" 404
+}
+

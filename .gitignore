@@ -4,6 +4,7 @@
 .cache/
 
 # Generated application output
+artifacts/
 **/.next/
 api-skinlab/src/generated/
 **/out/

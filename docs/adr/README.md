@@ -20,6 +20,7 @@ An external technical/compliance review may expand a provisional ADR's scope. Re
 
 - [ADR-0001: Fresh root pnpm monorepo](./0001-fresh-root-pnpm-monorepo.md) — Accepted; Ratified for repository structure
 - [ADR-0002: Identity, session, and access boundary](./0002-identity-session-and-access-boundary.md) — Accepted; Provisional — fake-data local/staging only
+- [ADR-0003: Fake-data staging and artifact promotion](./0003-fake-data-staging-and-artifact-promotion.md) — Accepted; Provisional — fake-data local/staging only
 - [ADR template](./0000-template.md)
 
 New ADRs use the next four-digit number and a short kebab-case title.

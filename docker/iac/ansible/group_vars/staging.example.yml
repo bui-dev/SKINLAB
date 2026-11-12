@@ -1,0 +1,6 @@
+---
+skinlab_install_dir: /opt/skinlab
+skinlab_user: skinlab
+skinlab_group: skinlab
+docker_compose_version: "2.32.4"
+

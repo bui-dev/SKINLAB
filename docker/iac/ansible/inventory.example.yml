@@ -1,0 +1,9 @@
+all:
+  children:
+    staging:
+      hosts:
+        staging-server-01:
+          ansible_host: 192.168.1.100
+          ansible_user: deploy
+          ansible_ssh_private_key_file: ~/.ssh/skinlab_deploy_key
+
